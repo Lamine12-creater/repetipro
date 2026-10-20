@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Factures')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu apparait" id="contenu">
+    <h1>Factures</h1>
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <!-- Navigation entre les mois -->
+    <div class="filtres">
+      <a th:href="@{/factures(mois=${moisPrecedent})}">‹ Préc.</a>
+      <a href="#" class="actif" th:text="${#strings.capitalize(libelleMois)}">Octobre 2026</a>
+      <a th:href="@{/factures(mois=${moisSuivant})}">Suiv. ›</a>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><strong th:text="${@fmt.nombre(total)}">70 000</strong><span>FCFA facturés</span></div>
+      <div class="stat"><strong th:text="${@fmt.nombre(paye)}">25 000</strong><span>FCFA payés</span></div>
+      <div class="stat"><strong th:text="${@fmt.nombre(enAttente)}">45 000</strong><span>FCFA en attente</span></div>
+    </div>
+
+    <!-- Règle : 1 facture par élève actif et par mois = son tarif mensuel -->
+    <form th:action="@{/factures/generer(mois=${mois})}" method="post">
+      <button type="submit" class="btn bloc" th:text="${'🧾 Générer les factures ' + @fmt.deMois(mois)}">🧾 Générer les factures d'octobre 2026</button>
+    </form>
+    <p class="petit" style="text-align:center">Une facture par élève actif = son tarif mensuel. Échéance le 10 du mois suivant.</p>
+
+    <section class="carte">
+      <h2 th:text="${#strings.capitalize(libelleMois)}">Octobre 2026</h2>
+      <p th:if="${factures.isEmpty()}" class="vide">Aucune facture pour ce mois.</p>
+      <ul class="liste">
+        <li th:each="f : ${factures}" class="ligne-facture">
+          <div th:replace="~{:: ligneFacture(${f})}"></div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="carte" th:unless="${impayeesAutres.isEmpty()}">
+      <h2>Impayés des autres mois</h2>
+      <ul class="liste">
+        <li th:each="f : ${impayeesAutres}" class="ligne-facture">
+          <div th:replace="~{:: ligneFacture(${f})}"></div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Rappel : où les parents paient (modifiable dans Paramètres) -->
+    <div class="alerte momo">
+      Les parents paient sur votre Mobile Money : <strong th:text="${@fmt.tel(moi.numeroMomo)}">01 XX</strong>
+      <span th:if="${moi.nomMomo}" th:text="${'(' + moi.nomMomo + ')'}"></span>.
+      <a th:href="@{/parametres}">Modifier</a>
+    </div>
+  </main>
+  <nav th:replace="~{fragments :: navBas('factures')}"></nav>
+
+  <!-- Fragment : une ligne de facture avec ses actions -->
+  <th:block th:if="false">
+  <div th:fragment="ligneFacture(f)">
+    <div class="haut">
+      <div class="infos">
+        <strong th:text="${f.eleve.nom}">Élève</strong>
+        <p class="petit" th:text="${f.numero + ' · ' + @fmt.mois(f.periode) + ' · ' + f.nombreSeances + ' séance(s)'}">F-…</p>
+        <p class="petit" th:if="${f.statut.name() == 'PAYE'}"
+           th:text="${'Payé le ' + #temporals.format(f.datePaiement, 'dd/MM/yyyy') + (f.referenceMomo != null ? ' · Réf. ' + f.referenceMomo : '')}">Payé</p>
+        <p class="petit" th:unless="${f.statut.name() == 'PAYE'}" th:text="${'Échéance : ' + #temporals.format(f.dateEcheance, 'dd/MM/yyyy')}">Échéance</p>
+      </div>
+      <div style="text-align:right">
+        <span class="montant" th:text="${@fmt.fcfa(f.montant)}">25 000 FCFA</span><br>
+        <span class="badge" th:classappend="${f.classeBadge}" th:text="${f.statutAffiche}">En attente</span>
+      </div>
+    </div>
+    <div class="actions">
+      <a th:href="@{/factures/{id}/pdf(id=${f.id})}" class="btn petit-btn secondaire">📄 PDF</a>
+      <a th:if="${f.statut.name() != 'PAYE' and liensRappel[f.id] != null}" th:href="${liensRappel[f.id]}"
+         target="_blank" rel="noopener" class="btn petit-btn whatsapp">💬 Rappel</a>
+      <form th:if="${f.statut.name() == 'PAYE'}" th:action="@{/factures/{id}/annuler-paiement(id=${f.id})}" method="post">
+        <button type="submit" class="lien-discret">Annuler le paiement</button>
+      </form>
+      <form th:unless="${f.statut.name() == 'PAYE'}" th:action="@{/factures/{id}/supprimer(id=${f.id})}" method="post"
+            onsubmit="return confirm('Supprimer cette facture ?')">
+        <button type="submit" class="lien-discret">Supprimer</button>
+      </form>
+    </div>
+    <form th:unless="${f.statut.name() == 'PAYE'}" th:action="@{/factures/{id}/payer(id=${f.id})}" method="post" class="form-ligne">
+      <input name="referenceMomo" maxlength="60" placeholder="Réf. MoMo (facultatif)" aria-label="Référence Mobile Money">
+      <button type="submit" class="btn petit-btn">✔ Payé</button>
+    </form>
+  </div>
+  </th:block>
+</body>
+</html>

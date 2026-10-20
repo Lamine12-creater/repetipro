@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Tableau de bord')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu apparait" id="contenu">
+    <!-- Bandeau sombre : salutation + chiffres clés -->
+    <section class="bandeau">
+      <p class="surtitre" th:text="${#temporals.format(aujourdhui, 'EEEE d MMMM yyyy')}">mardi 20 octobre 2026</p>
+      <h1>Bonjour <span class="accent" th:text="${moi.prenom}">Rodrigue</span> 👋</h1>
+      <div class="stats">
+        <div class="stat"><strong th:text="${seancesDuJour.size()}">3</strong><span>séances aujourd'hui</span></div>
+        <div class="stat"><strong th:text="${nbEleves}">4</strong><span>élèves actifs</span></div>
+        <div class="stat"><strong th:text="${@fmt.nombre(aEncaisser)}">45 000</strong><span>FCFA à encaisser</span></div>
+      </div>
+    </section>
+
+    <div th:if="${param.bienvenue}" class="alerte succes">
+      Bienvenue sur RépétiPro ! Commencez par <a th:href="@{/eleves/nouveau}">ajouter votre premier élève</a>.
+    </div>
+    <div th:replace="~{fragments :: messages}"></div>
+
+
+    <!-- Séances du jour -->
+    <section class="carte">
+      <div class="carte-titre"><h2>Séances du jour</h2><a th:href="@{/seances}" class="petit">Planifier</a></div>
+      <ul class="liste" th:unless="${seancesDuJour.isEmpty()}">
+        <li th:each="s : ${seancesDuJour}">
+          <span class="heure" th:text="${#temporals.format(s.debut, 'HH''h''mm')}">16h00</span>
+          <div class="infos">
+            <strong th:text="${s.eleve.nom}">Élève</strong>
+            <p class="petit" th:text="${s.eleve.classe + ' · ' + (s.eleve.matieres ?: '') + ' · ' + s.dureeLisible}">3e · Maths · 2 h</p>
+          </div>
+          <a th:if="${s.presence.name() == 'NON_POINTEE'}" th:href="@{/seances/{id}(id=${s.id})}" class="btn petit-btn">Pointer</a>
+          <a th:unless="${s.presence.name() == 'NON_POINTEE'}" th:href="@{/seances/{id}(id=${s.id})}"
+             class="badge" th:classappend="${s.presence.name() == 'ABSENT'} ? 'retard' : 'paye'" th:text="${s.presence.libelle}">Présent</a>
+        </li>
+      </ul>
+      <p th:if="${seancesDuJour.isEmpty()}" class="vide">Aucune séance aujourd'hui. <a th:href="@{/seances}">En planifier une</a></p>
+    </section>
+
+    <!-- Factures impayées -->
+    <section class="carte">
+      <div class="carte-titre"><h2>Factures impayées</h2><a th:href="@{/factures}" class="petit">Gérer</a></div>
+      <ul class="liste" th:unless="${impayees.isEmpty()}">
+        <li th:each="f : ${impayees}">
+          <div class="infos">
+            <strong th:text="${f.eleve.nom}">Élève</strong>
+            <p class="petit" th:text="${@fmt.mois(f.periode) + ' · ' + f.nombreSeances + ' séance(s)'}">septembre 2026</p>
+          </div>
+          <div style="text-align:right"><span class="montant" th:text="${@fmt.fcfa(f.montant)}">20 000 FCFA</span><br>
+            <span class="badge" th:classappend="${f.classeBadge}" th:text="${f.statutAffiche}">En retard</span></div>
+        </li>
+      </ul>
+      <p th:if="${impayees.isEmpty()}" class="vide">Aucune facture impayée. 🎉</p>
+    </section>
+  </main>
+  <nav th:replace="~{fragments :: navBas('accueil')}"></nav>
+</body>
+</html>

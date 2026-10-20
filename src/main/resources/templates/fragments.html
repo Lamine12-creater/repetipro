@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- Morceaux de page réutilisés partout (Thymeleaf "fragments").
+     Utilisation : <head th:replace="~{fragments :: head('Titre')}"></head> -->
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head th:fragment="head(titre)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1f2544">
+  <title th:text="${titre} + ' — RépétiPro'">RépétiPro</title>
+  <!-- Police Inter (Google Fonts) ; si pas de réseau, la police système prend le relais -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="icon" th:href="@{/favicon.svg}" type="image/svg+xml">
+</head>
+
+<body>
+
+<!-- Logo : pastille ronde (livre ouvert) + nom + slogan -->
+<a th:fragment="logo(lien)" th:href="${lien}" class="logo">
+  <span class="pastille" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5.5C4.5 4 8 4 12 6c4-2 7.5-2 10-.5V19c-2.5-1.5-6-1.5-10 .5-4-2-7.5-2-10-.5z"/><path d="M12 6v13.5"/></svg>
+  </span>
+  <span><span class="nom">RépétiPro</span><span class="slogan">Cours à domicile · Bénin</span></span>
+</a>
+
+<!-- Barre du haut des pages connectées : logo, menu (ordinateur), initiales -->
+<header th:fragment="barre" class="barre">
+  <a href="#contenu" class="lien-evitement">Aller au contenu</a>
+  <a th:replace="~{fragments :: logo(@{/tableau-de-bord})}"></a>
+  <nav aria-label="Navigation principale" style="height:100%">
+    <ul class="menu-haut">
+      <li><a th:href="@{/tableau-de-bord}" th:classappend="${rubrique == 'accueil'} ? 'actif'">Accueil</a></li>
+      <li><a th:href="@{/eleves}" th:classappend="${rubrique == 'eleves'} ? 'actif'">Élèves</a></li>
+      <li><a th:href="@{/seances}" th:classappend="${rubrique == 'seances'} ? 'actif'">Séances</a></li>
+      <li><a th:href="@{/factures}" th:classappend="${rubrique == 'factures'} ? 'actif'">Factures</a></li>
+    </ul>
+  </nav>
+  <a th:href="@{/parametres}" class="avatar" title="Paramètres"
+     th:text="${moi != null ? moi.initiales : '?'}">RD</a>
+</header>
+
+<!-- Messages de confirmation / erreur (passés par "flash" après une redirection) -->
+<div th:fragment="messages" th:remove="tag">
+  <div th:if="${message}" class="alerte succes" role="status" th:text="${message}">Enregistré.</div>
+  <div th:if="${erreur}" class="alerte erreur" role="alert" th:text="${erreur}">Erreur.</div>
+</div>
+
+<!-- Navigation du bas (téléphone) : "actif" = nom de la page courante -->
+<nav th:fragment="navBas(actif)" class="nav-bas" aria-label="Navigation">
+  <a th:href="@{/tableau-de-bord}" th:classappend="${actif == 'accueil'} ? 'actif'">
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Accueil</a>
+  <a th:href="@{/eleves}" th:classappend="${actif == 'eleves'} ? 'actif'">
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .7 3.2 2.4 3.5 5.2"/></svg></span>Élèves</a>
+  <a th:href="@{/seances}" th:classappend="${actif == 'seances'} ? 'actif'">
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M8.5 15l2.5 2.5 4.5-4.5"/></svg></span>Séances</a>
+  <a th:href="@{/factures}" th:classappend="${actif == 'factures'} ? 'actif'">
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></span>Factures</a>
+</nav>
+
+</body>
+</html>

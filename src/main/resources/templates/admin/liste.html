@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Administration')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu apparait" id="contenu">
+    <h1>Comptes répétiteurs</h1>
+    <p class="petit">Après réception d'un paiement Mobile Money, activez la formule Solo du compte concerné.</p>
+    <div th:replace="~{fragments :: messages}"></div>
+    <section class="carte">
+      <ul class="liste">
+        <li th:each="c : ${comptes}">
+          <span class="initiales" th:text="${c.initiales}">AB</span>
+          <div class="infos">
+            <strong th:text="${c.nomComplet}">Nom</strong>
+            <p class="petit" th:text="${@fmt.tel(c.telephone) + ' · inscrit le ' + #temporals.format(c.dateInscription, 'dd/MM/yyyy')}">01…</p>
+          </div>
+          <form th:action="@{/admin/{id}/plan(id=${c.id}, plan=${c.plan.name() == 'SOLO' ? 'GRATUIT' : 'SOLO'})}" method="post">
+            <button type="submit" class="btn petit-btn" th:classappend="${c.plan.name() == 'SOLO'} ? 'secondaire'"
+                    th:text="${c.plan.name() == 'SOLO' ? 'Solo ✔ (retirer)' : 'Activer Solo'}">Activer Solo</button>
+          </form>
+        </li>
+      </ul>
+    </section>
+  </main>
+  <nav th:replace="~{fragments :: navBas('')}"></nav>
+</body>
+</html>

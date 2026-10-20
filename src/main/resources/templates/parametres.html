@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Paramètres')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu apparait" id="contenu">
+    <h1>Paramètres</h1>
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <form class="carte" th:action="@{/parametres}" method="post">
+      <h2>Mon profil</h2>
+      <label for="nom">Nom affiché aux parents</label>
+      <input id="nom" name="nomComplet" th:value="${param.nomComplet != null ? param.nomComplet[0] : moi.nomComplet}" maxlength="100" required>
+
+      <h2 style="margin-top:1.2rem">💳 Mobile Money (sur les factures)</h2>
+      <label for="momo">Numéro Mobile Money</label>
+      <input id="momo" name="numeroMomo" type="tel" inputmode="tel" th:value="${numeroMomo}" placeholder="01 97 00 00 00">
+      <label for="nomMomo">Nom affiché par l'opérateur</label>
+      <input id="nomMomo" name="nomMomo" th:value="${param.nomMomo != null ? param.nomMomo[0] : moi.nomMomo}" maxlength="100" placeholder="Ex. RODRIGUE K.">
+      <p class="petit">Ce numéro apparaît sur les factures PDF et les rappels WhatsApp.</p>
+      <p style="margin-top:1rem"><button type="submit" class="btn bloc">Enregistrer</button></p>
+    </form>
+
+    <section class="carte">
+      <h2>Mon abonnement</h2>
+      <p>Formule actuelle : <strong th:text="${moi.plan.name() == 'SOLO' ? 'Solo (élèves illimités)' : 'Gratuite (3 élèves max.)'}">Gratuite</strong></p>
+      <a th:if="${moi.plan.name() != 'SOLO'}" th:href="@{/formule}" class="btn bloc">Passer à Solo · 1 500 FCFA/mois</a>
+    </section>
+
+    <section class="carte">
+      <p class="petit">Compte : <span th:text="${@fmt.tel(moi.telephone)}">01 …</span></p>
+      <a th:if="${estAdmin}" th:href="@{/admin}" class="btn bloc secondaire">🛠️ Administration</a>
+      <form th:action="@{/deconnexion}" method="post" style="margin-top:.6rem">
+        <button type="submit" class="btn bloc secondaire">Se déconnecter</button>
+      </form>
+    </section>
+  </main>
+  <nav th:replace="~{fragments :: navBas('')}"></nav>
+</body>
+</html>

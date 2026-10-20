@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Oups')}"></head>
+<body>
+  <header class="entete-site">
+    <a th:replace="~{fragments :: logo(@{/})}"></a>
+  </header>
+  <main class="page-connexion apparait" id="contenu" style="text-align:center">
+    <div class="carte">
+      <h1 th:text="${status == 404 ? 'Page introuvable' : (status == 403 ? 'Accès refusé' : 'Oups, un souci')}">Oups</h1>
+      <p class="petit" th:text="${status == 404 ? 'Cette page n''existe pas ou ne vous appartient pas.' : 'Réessayez dans un instant.'}">…</p>
+      <a th:href="@{/tableau-de-bord}" class="btn bloc">Retour à l'accueil</a>
+    </div>
+  </main>
+</body>
+</html>

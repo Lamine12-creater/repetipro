@@ -1,0 +1,5 @@
+target/
+data/
+captures/
+.git/
+*.zip

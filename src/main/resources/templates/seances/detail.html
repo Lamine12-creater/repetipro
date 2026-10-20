@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Séance')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu apparait" id="contenu">
+    <p class="surtitre" th:text="${#temporals.format(seance.debut, 'EEEE d MMMM')}">mardi 20 octobre</p>
+    <h1>Séance de <span class="accent" th:text="${seance.eleve.prenom}">Fifamè</span></h1>
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <section class="carte">
+      <ul class="liste">
+        <li>
+          <span class="heure" th:text="${#temporals.format(seance.debut, 'HH''h''mm')}">16h00</span>
+          <div class="infos">
+            <strong th:text="${seance.eleve.nom}">Fifamè Exemple</strong>
+            <p class="petit" th:text="${seance.eleve.classe + ' · ' + (seance.eleve.matieres ?: '') + ' · ' + seance.dureeLisible}">3e · Maths · 2 h</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Présence + compte rendu. Deux boutons : enregistrer, ou enregistrer ET ouvrir WhatsApp. -->
+    <form class="carte" th:action="@{/seances/{id}(id=${seance.id})}" method="post">
+      <h2>Présence</h2>
+      <div class="presence">
+        <th:block th:each="p, i : ${presences}">
+          <input type="radio" name="presence" th:id="'p' + ${i.index}" th:value="${p.name()}"
+                 th:checked="${seance.presence == p or (seance.presence.name() == 'NON_POINTEE' and i.first)}">
+          <label th:for="'p' + ${i.index}"
+                 th:text="${(p.name() == 'PRESENT' ? '✅ ' : (p.name() == 'EN_RETARD' ? '⏰ ' : '❌ ')) + p.libelle}">Présent</label>
+        </th:block>
+      </div>
+
+      <label for="notions">Notions travaillées</label>
+      <input id="notions" name="notions" maxlength="255" th:value="${seance.notions}" placeholder="Ex. Théorème de Thalès">
+
+      <label for="cr">Compte rendu pour le parent</label>
+      <textarea id="cr" name="compteRendu" maxlength="2000" th:text="${seance.compteRendu}"
+                placeholder="Ce qui a été compris, à revoir, devoirs…"></textarea>
+
+      <p style="margin-top:1rem"><button type="submit" name="action" value="enregistrer" class="btn bloc secondaire">💾 Enregistrer</button></p>
+      <button type="submit" name="action" value="whatsapp" class="btn bloc whatsapp" th:disabled="${seance.eleve.whatsappParent == null}">
+        💬 Enregistrer et envoyer
+      </button>
+      <p class="petit" style="text-align:center;margin-top:.5rem" th:if="${seance.eleve.whatsappParent}"
+         th:text="${'Parent : ' + (seance.eleve.nomParent ?: '') + ' · ' + @fmt.tel(seance.eleve.whatsappParent)}">Parent</p>
+      <p class="petit" style="text-align:center;margin-top:.5rem" th:unless="${seance.eleve.whatsappParent}">
+        Pas de WhatsApp parent : <a th:href="@{/eleves/{id}/modifier(id=${seance.eleve.id})}">l'ajouter</a>.</p>
+      <p th:if="${lienWhatsApp != null and seance.compteRendu != null}" class="petit" style="text-align:center">
+        <a th:href="${lienWhatsApp}" target="_blank" rel="noopener">Renvoyer le dernier compte rendu enregistré</a></p>
+    </form>
+
+    <form th:action="@{/seances/{id}/supprimer(id=${seance.id})}" method="post" style="text-align:center"
+          onsubmit="return confirm('Supprimer cette séance ?')">
+      <button type="submit" class="lien-discret">Supprimer la séance</button>
+    </form>
+  </main>
+  <nav th:replace="~{fragments :: navBas('seances')}"></nav>
+</body>
+</html>

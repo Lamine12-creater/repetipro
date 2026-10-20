@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${eleveId == null ? 'Nouvel élève' : 'Modifier l''élève'})}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu apparait" id="contenu">
+    <h1 th:text="${eleveId == null ? 'Nouvel élève' : 'Modifier l''élève'}">Nouvel élève</h1>
+    <!-- Même formulaire pour créer (POST /eleves) et modifier (POST /eleves/{id}) -->
+    <form class="carte" method="post" th:object="${form}"
+          th:action="${eleveId == null} ? @{/eleves} : @{/eleves/{id}(id=${eleveId})}">
+      <label for="nom">Nom de l'élève</label>
+      <input id="nom" th:field="*{nom}" placeholder="Ex. Fifamè Exemple" required>
+      <p class="erreur-champ" th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}"></p>
+
+      <div class="grille-2">
+        <div>
+          <label for="classe">Classe</label>
+          <input id="classe" th:field="*{classe}" placeholder="3e, Tle D…" required>
+          <p class="erreur-champ" th:if="${#fields.hasErrors('classe')}" th:errors="*{classe}"></p>
+        </div>
+        <div>
+          <label for="tarif">Tarif mensuel (FCFA)</label>
+          <input id="tarif" th:field="*{tarifMensuel}" type="number" min="0" step="500" inputmode="numeric" required>
+          <p class="erreur-champ" th:if="${#fields.hasErrors('tarifMensuel')}" th:errors="*{tarifMensuel}"></p>
+        </div>
+      </div>
+
+      <label for="matieres">Matières</label>
+      <input id="matieres" th:field="*{matieres}" placeholder="Maths, PCT">
+      <p class="erreur-champ" th:if="${#fields.hasErrors('matieres')}" th:errors="*{matieres}"></p>
+
+      <label for="parent">Nom du parent</label>
+      <input id="parent" th:field="*{nomParent}" placeholder="Mme Exemple">
+      <p class="erreur-champ" th:if="${#fields.hasErrors('nomParent')}" th:errors="*{nomParent}"></p>
+
+      <label for="wa">WhatsApp du parent</label>
+      <input id="wa" th:field="*{whatsappParent}" type="tel" inputmode="tel" placeholder="01 97 00 00 00">
+      <p class="petit">Numéro béninois à 10 chiffres ; +229 est ajouté automatiquement.</p>
+      <p class="erreur-champ" th:if="${#fields.hasErrors('whatsappParent')}" th:errors="*{whatsappParent}"></p>
+
+      <p style="margin-top:1rem"><button type="submit" class="btn bloc">Enregistrer</button></p>
+      <a th:href="@{/eleves}" class="btn bloc secondaire">Annuler</a>
+    </form>
+  </main>
+  <nav th:replace="~{fragments :: navBas('eleves')}"></nav>
+</body>
+</html>

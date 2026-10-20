@@ -1,0 +1,21 @@
+# Compilation Maven
+target/
+# Base H2 locale (profil dev)
+data/
+*.db
+*.mv.db
+*.trace.db
+# Secrets / variables d'environnement locales
+.env
+.env.*
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+# Divers
+*.log
+*.zip
+.DS_Store

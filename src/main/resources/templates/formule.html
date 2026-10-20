@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Formule Solo')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu apparait" id="contenu">
+    <div th:if="${param.limite}" class="alerte info">
+      🎉 Bravo, vous suivez déjà <strong th:text="${limite}">3</strong> élèves ! La formule gratuite s'arrête là :
+      passez à la formule <strong>Solo</strong> pour en ajouter d'autres.
+    </div>
+
+    <section class="carte tarif vedette">
+      <h1>Formule Solo</h1>
+      <div class="prix">1 500 FCFA <small>/ mois</small></div>
+      <ul><li>Élèves illimités</li><li>Comptes rendus et rappels WhatsApp</li><li>Factures PDF</li></ul>
+    </section>
+
+    <section class="carte">
+      <h2>💳 Comment payer</h2>
+      <div class="alerte momo">
+        Numéro Mobile Money RépétiPro : <strong th:text="${momoNumero}">01 XX XX XX XX</strong><br>
+        Nom affiché : <span th:text="${momoNom}">REPETIPRO</span>
+      </div>
+      <ol style="padding-left:1.2rem">
+        <li>Envoyez <strong>1 500 FCFA</strong> (ou 4 500 FCFA pour 3 mois) par MTN MoMo, Moov Money ou Celtiis Cash.</li>
+        <li>En motif, indiquez : <strong>Solo + votre numéro de compte</strong>
+          <span th:if="${moi != null}">(<span th:text="${@fmt.tel(moi.telephone)}"></span>)</span>.</li>
+        <li>Votre compte passe en Solo dès réception (activation manuelle, en général le jour même).</li>
+      </ol>
+      <a th:href="@{/tableau-de-bord}" class="btn bloc secondaire">Retour à mon espace</a>
+    </section>
+  </main>
+  <th:block th:if="${moi != null}"><nav th:replace="~{fragments :: navBas('')}"></nav></th:block>
+</body>
+</html>

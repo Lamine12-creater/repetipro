@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Connexion')}"></head>
+<body>
+  <header class="entete-site">
+    <a th:replace="~{fragments :: logo(@{/})}"></a>
+  </header>
+  <main class="page-connexion apparait" id="contenu">
+    <h1>Bon retour 👋</h1>
+    <p class="petit">Connectez-vous pour gérer vos élèves</p>
+
+    <div th:if="${param.erreur}" class="alerte erreur">Numéro ou mot de passe incorrect.</div>
+    <div th:if="${param.deconnecte}" class="alerte succes">Vous êtes déconnecté. À bientôt !</div>
+
+    <div class="carte">
+      <!-- Envoyé à Spring Security (POST /connexion) ; th:action ajoute le jeton CSRF -->
+      <form th:action="@{/connexion}" method="post">
+        <label for="tel">Numéro de téléphone</label>
+        <input id="tel" name="telephone" type="tel" placeholder="01 97 00 00 00" inputmode="tel" required autocomplete="username">
+
+        <label for="mdp">Mot de passe</label>
+        <input id="mdp" name="motDePasse" type="password" required autocomplete="current-password">
+
+        <label class="case"><input type="checkbox" name="souvenir" checked> Rester connecté</label>
+
+        <p style="margin-top:1rem"><button type="submit" class="btn bloc">Se connecter</button></p>
+      </form>
+    </div>
+    <p class="petit" style="text-align:center;margin-top:.5rem">Pas encore de compte ? <a th:href="@{/inscription}">Créer un compte gratuit</a></p>
+  </main>
+</body>
+</html>
