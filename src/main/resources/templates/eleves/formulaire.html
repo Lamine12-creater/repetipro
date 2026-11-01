@@ -3,7 +3,7 @@
 <head th:replace="~{fragments :: head(${eleveId == null ? 'Nouvel élève' : 'Modifier l''élève'})}"></head>
 <body>
   <header th:replace="~{fragments :: barre}"></header>
-  <main class="contenu apparait" id="contenu">
+  <main class="contenu" id="contenu">
     <h1 th:text="${eleveId == null ? 'Nouvel élève' : 'Modifier l''élève'}">Nouvel élève</h1>
     <!-- Même formulaire pour créer (POST /eleves) et modifier (POST /eleves/{id}) -->
     <form class="carte" method="post" th:object="${form}"

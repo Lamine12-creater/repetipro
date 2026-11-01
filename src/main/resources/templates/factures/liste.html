@@ -3,28 +3,30 @@
 <head th:replace="~{fragments :: head('Factures')}"></head>
 <body>
   <header th:replace="~{fragments :: barre}"></header>
-  <main class="contenu apparait" id="contenu">
+  <main class="contenu" id="contenu">
     <h1>Factures</h1>
     <div th:replace="~{fragments :: messages}"></div>
 
     <!-- Navigation entre les mois -->
     <div class="filtres">
-      <a th:href="@{/factures(mois=${moisPrecedent})}">‹ Préc.</a>
+      <a th:href="@{/factures(mois=${moisPrecedent})}">‹ Mois précédent</a>
       <a href="#" class="actif" th:text="${#strings.capitalize(libelleMois)}">Octobre 2026</a>
-      <a th:href="@{/factures(mois=${moisSuivant})}">Suiv. ›</a>
+      <a th:href="@{/factures(mois=${moisSuivant})}">Mois suivant ›</a>
     </div>
 
     <div class="stats">
       <div class="stat"><strong th:text="${@fmt.nombre(total)}">70 000</strong><span>FCFA facturés</span></div>
       <div class="stat"><strong th:text="${@fmt.nombre(paye)}">25 000</strong><span>FCFA payés</span></div>
-      <div class="stat"><strong th:text="${@fmt.nombre(enAttente)}">45 000</strong><span>FCFA en attente</span></div>
+      <div class="stat fort"><strong th:text="${@fmt.nombre(enAttente)}">45 000</strong><span>FCFA en attente</span></div>
     </div>
 
     <!-- Règle : 1 facture par élève actif et par mois = son tarif mensuel -->
-    <form th:action="@{/factures/generer(mois=${mois})}" method="post">
-      <button type="submit" class="btn bloc" th:text="${'🧾 Générer les factures ' + @fmt.deMois(mois)}">🧾 Générer les factures d'octobre 2026</button>
-    </form>
-    <p class="petit" style="text-align:center">Une facture par élève actif = son tarif mensuel. Échéance le 10 du mois suivant.</p>
+    <div class="barre-outils">
+      <form th:action="@{/factures/generer(mois=${mois})}" method="post">
+        <button type="submit" class="btn" th:text="${'Générer les factures ' + @fmt.deMois(mois)}">Générer les factures d'octobre 2026</button>
+      </form>
+      <p class="petit">Une facture par élève actif, au montant de son tarif mensuel. À payer avant le 10 du mois suivant.</p>
+    </div>
 
     <section class="carte">
       <h2 th:text="${#strings.capitalize(libelleMois)}">Octobre 2026</h2>
@@ -71,9 +73,9 @@
       </div>
     </div>
     <div class="actions">
-      <a th:href="@{/factures/{id}/pdf(id=${f.id})}" class="btn petit-btn secondaire">📄 PDF</a>
+      <a th:href="@{/factures/{id}/pdf(id=${f.id})}" class="btn petit-btn secondaire">PDF</a>
       <a th:if="${f.statut.name() != 'PAYE' and liensRappel[f.id] != null}" th:href="${liensRappel[f.id]}"
-         target="_blank" rel="noopener" class="btn petit-btn whatsapp">💬 Rappel</a>
+         target="_blank" rel="noopener" class="btn petit-btn whatsapp">Rappel WhatsApp</a>
       <form th:if="${f.statut.name() == 'PAYE'}" th:action="@{/factures/{id}/annuler-paiement(id=${f.id})}" method="post">
         <button type="submit" class="lien-discret">Annuler le paiement</button>
       </form>
@@ -84,7 +86,7 @@
     </div>
     <form th:unless="${f.statut.name() == 'PAYE'}" th:action="@{/factures/{id}/payer(id=${f.id})}" method="post" class="form-ligne">
       <input name="referenceMomo" maxlength="60" placeholder="Réf. MoMo (facultatif)" aria-label="Référence Mobile Money">
-      <button type="submit" class="btn petit-btn">✔ Payé</button>
+      <button type="submit" class="btn petit-btn">Marquer payé</button>
     </form>
   </div>
   </th:block>

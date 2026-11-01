@@ -1,138 +1,164 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments :: head('Gérez vos cours à domicile')}"></head>
-<body>
+<head th:replace="~{fragments :: head('Le cahier du répétiteur')}"></head>
+<body class="accueil">
   <header class="entete-site">
     <a href="#contenu" class="lien-evitement">Aller au contenu</a>
     <a th:replace="~{fragments :: logo(@{/})}"></a>
-    <nav aria-label="Navigation principale" style="height:100%">
+    <nav aria-label="Navigation principale">
       <ul class="menu-haut">
-        <li><a href="#comment" class="actif">Comment ça marche</a></li>
-        <li><a href="#avantages">Avantages</a></li>
-        <li><a href="#tarifs">Tarifs</a></li>
+        <li><a href="#comment">Comment ça marche</a></li>
+        <li><a href="#tarifs">Prix</a></li>
+        <li><a href="#questions">Questions</a></li>
       </ul>
     </nav>
-    <a th:if="${moi == null}" th:href="@{/connexion}" class="btn-entete">Connexion</a>
+    <a th:if="${moi == null}" th:href="@{/connexion}" class="btn-entete">Se connecter</a>
     <a th:if="${moi != null}" th:href="@{/tableau-de-bord}" class="btn-entete">Mon espace</a>
   </header>
 
   <main id="contenu">
-    <!-- HERO : fond bleu nuit, titre extra-gras avec un mot surligné, 2 boutons pilule -->
-    <section class="hero">
-      <div class="hero-grille">
-        <div class="apparait">
-          <p class="surtitre">Pour les répétiteurs indépendants</p>
-          <h1>Vos cours à domicile, <span class="accent">enfin organisés</span>.</h1>
-          <p class="intro">Planning des séances, présences, compte rendu envoyé aux parents sur WhatsApp et factures du mois payées par Mobile Money. Tout depuis votre téléphone.</p>
+    <!-- LA UNE : texte à gauche, une page de cahier d'exemple à droite -->
+    <section class="une">
+      <div class="une-grille">
+        <div>
+          <p class="pour-qui">Pour les répétiteurs qui font cours à domicile</p>
+          <h1>Le cahier du répétiteur, <em>sur votre téléphone</em>.</h1>
+          <p class="intro">Vous allez chez les élèves après l'école, vous notez les séances dans un cahier,
+            et à la fin du mois il faut relancer les parents pour être payé. RépétiPro garde tout au même endroit :
+            qui est venu, ce qui a été travaillé, et qui a payé.</p>
           <div class="boutons">
-            <a th:href="@{/inscription}" class="btn">Commencer gratuitement</a>
-            <a th:href="@{/connexion}" class="btn clair">J'ai déjà un compte</a>
+            <a th:href="@{/inscription}" class="btn">Créer mon compte</a>
+            <a th:href="@{/connexion}">J'ai déjà un compte</a>
           </div>
-          <p class="rassurance">Gratuit jusqu'à 3 élèves · Sans carte bancaire · En français</p>
+          <p class="conditions">Gratuit jusqu'à 3 élèves, sans carte bancaire. Au-delà, 1&nbsp;500&nbsp;FCFA par mois, payés par Mobile Money.</p>
         </div>
 
-        <!-- Aperçu de l'appli dessiné en HTML/CSS (aucune image) -->
-        <div class="telephone apparait" aria-hidden="true">
-          <div class="ecran">
-            <div class="ecran-haut"><span>Aujourd'hui</span><span>3 séances</span></div>
-            <div class="ecran-corps">
-              <div class="mini-carte"><span class="heure">16h00</span><div><b>Fifamè · 3e</b>Maths</div><span class="badge paye">Présente</span></div>
-              <div class="mini-carte"><span class="heure">17h30</span><div><b>Josué · Tle D</b>PCT</div><span class="badge attente">À pointer</span></div>
-              <div class="mini-carte"><span class="heure">19h00</span><div><b>Sèna · CM2</b>Français</div><span class="badge attente">À pointer</span></div>
-              <div class="mini-wa">💬 Compte rendu envoyé au parent</div>
-              <div class="mini-carte"><div><b>Facture d'octobre</b>Josué · 20 000 FCFA</div><span class="badge retard">En retard</span></div>
-            </div>
-          </div>
-        </div>
+        <!-- Exemple dessiné en HTML/CSS. Données fictives. -->
+        <figure class="cahier" aria-label="Exemple de journée dans RépétiPro (données fictives)">
+          <figcaption class="main-ecrite">exemple, noms inventés</figcaption>
+          <p class="qui">Mme Houngbo · 6 élèves · Cotonou</p>
+          <p class="jour">Mardi 4 novembre</p>
+          <table>
+            <tr><td class="h">16h00</td><td>Fifamè, 3e</td><td class="m">Maths</td><td><span class="ok">présente</span></td></tr>
+            <tr><td class="h">17h30</td><td>Josué, Tle D</td><td class="m">PCT</td><td><span class="tard">en retard</span></td></tr>
+            <tr><td class="h">19h00</td><td>Sèna, CM2</td><td class="m">Français</td><td><span class="afaire">à pointer</span></td></tr>
+          </table>
+          <p class="bilan">Octobre : 4 parents sur 6 ont payé. Reste <strong>45&nbsp;000&nbsp;FCFA</strong>.</p>
+          <span class="note main-ecrite">relancer Josué et Kevin</span>
+        </figure>
       </div>
     </section>
 
-    <!-- COMMENT ÇA MARCHE : 3 étapes numérotées -->
-    <section class="section claire" id="comment">
-      <div class="dedans">
-        <p class="surtitre">Comment ça marche</p>
-        <h2>Trois gestes après <span class="accent">chaque séance</span></h2>
-        <ol class="etapes apparait">
-          <li class="etape"><span class="num">1</span><h3>Pointez la séance</h3><p>Présent, en retard ou absent : un toucher suffit, depuis la maison de l'élève.</p></li>
-          <li class="etape"><span class="num">2</span><h3>Rassurez le parent</h3><p>Notez les notions vues ; le compte rendu part sur WhatsApp, déjà rédigé.</p></li>
-          <li class="etape"><span class="num">3</span><h3>Encaissez le mois</h3><p>Une facture PDF par élève, un rappel WhatsApp, un paiement Mobile Money.</p></li>
+    <!-- UNE SOIRÉE TYPE : déroulé horaire -->
+    <section class="section soiree" id="comment">
+      <div class="dedans deux-col">
+        <div class="colle">
+          <h2>Comment ça se passe, concrètement</h2>
+          <p class="chapeau">Pas de formation à suivre. Si vous savez envoyer un message WhatsApp, vous savez utiliser RépétiPro.</p>
+        </div>
+        <ol class="deroule">
+          <li><span class="moment">18h00</span><div><h3>Fin de la séance chez Fifamè</h3>
+            <p>Vous touchez « Présent », vous notez en deux mots ce que vous avez fait : équations du 1er degré, fractions à revoir.</p></div></li>
+          <li><span class="moment">18h02</span><div><h3>Le parent est au courant</h3>
+            <p>Le compte rendu s'ouvre dans WhatsApp, déjà écrit. Vous relisez et vous appuyez sur Envoyer.</p></div></li>
+          <li><span class="moment">Fin du mois</span><div><h3>Les factures du mois sont prêtes</h3>
+            <p>Une facture PDF par élève, avec votre numéro MoMo dessus. Quand un parent paie, vous notez la référence de la transaction.</p></div></li>
+          <li><span class="moment">Le 10</span><div><h3>Ceux qui n'ont pas encore payé</h3>
+            <p>Un rappel poli part sur WhatsApp, avec le montant et le motif à mettre. Plus besoin de chercher qui doit quoi.</p></div></li>
         </ol>
       </div>
     </section>
 
-    <!-- BANDEAU SOMBRE : vague + gros chiffres (ce que l'appli fait pour vous) -->
-    <section class="section sombre">
-      <svg class="vague" viewBox="0 0 1440 72" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0h1440v8C1100 70 340 70 0 8z" fill="#f1f4f9"/></svg>
-      <div class="dedans centre">
-        <p class="surtitre">Ce que RépétiPro change</p>
-        <h2>Moins de paperasse, plus de cours</h2>
-        <div class="chiffres apparait">
-          <div class="chiffre"><strong>1 clic</strong><span>pour envoyer le compte rendu au parent</span></div>
-          <div class="chiffre"><strong>0</strong><span>cahier de présence à tenir</span></div>
-          <div class="chiffre"><strong>3</strong><span>élèves suivis gratuitement, sans limite de durée</span></div>
+    <!-- LE MESSAGE REÇU PAR LE PARENT -->
+    <section class="section" id="avantages">
+      <div class="dedans deux-col inverse">
+        <div class="message-parent">
+          <span class="main-ecrite">ce que reçoit le parent :</span>
+          <div class="bulle">Bonjour M. Agossou,
+Compte rendu de la séance de Fifamè du mardi 4 novembre :
+• Présence : Présent
+• Notions : Équations du 1er degré
+
+Elle a bien suivi. À revoir : les fractions. Devoir : exercices 4 à 7, page 52.
+
+Afiavi Houngbo (répétiteur)<span class="heure-msg">18:02</span></div>
+        </div>
+        <div>
+          <h2>Pourquoi WhatsApp ?</h2>
+          <p>Parce que les parents l'ouvrent déjà tous les jours. Ils n'ont rien à installer, pas de compte à créer.
+            Le message part de votre propre numéro : c'est vous qu'ils connaissent.</p>
+          <hr class="trait">
+          <h3>Ce que RépétiPro ne fait pas</h3>
+          <ul class="franchise">
+            <li>Il ne vous trouve pas d'élèves. Il vous aide à bien suivre ceux que vous avez.</li>
+            <li>Il ne touche pas à l'argent. Les parents paient directement sur votre Mobile Money.</li>
+            <li>Il n'envoie rien sans vous : chaque message, c'est vous qui appuyez sur Envoyer.</li>
+          </ul>
         </div>
       </div>
     </section>
 
-    <!-- AVANTAGES : cartes très arrondies qui se soulèvent au survol -->
-    <section class="section claire" id="avantages">
-      <div class="dedans centre">
-        <h2>Pensé pour le <span class="accent">répétiteur solo</span></h2>
-        <p class="chapeau">Étudiant, enseignant ou professionnel du soutien scolaire : gardez le contrôle de vos élèves, de vos horaires et de vos revenus.</p>
-        <div class="avantages apparait" style="text-align:left">
-          <div class="avantage">
-            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></span>
-            <h3>Planning clair</h3><p>Séances du jour et de la semaine, élève par élève, avec la durée.</p>
+    <!-- PRIX : un tableau simple -->
+    <section class="section soiree" id="tarifs">
+      <div class="dedans deux-col">
+        <div class="colle">
+          <h2>Combien ça coûte</h2>
+          <p class="chapeau">Paiement par MTN MoMo, Moov Money ou Celtiis Cash. Prix indicatifs, en FCFA.</p>
+        </div>
+        <div>
+          <table class="tableau-tarifs">
+            <thead><tr><th scope="col">Formule</th><th scope="col">Prix</th><th scope="col">Ce qui est compris</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Gratuite</th><td class="prix-cell">0&nbsp;FCFA</td>
+                <td>Jusqu'à 3 élèves. Séances, comptes rendus WhatsApp et factures PDF : tout marche.</td></tr>
+              <tr class="solo"><th scope="row">Solo</th><td class="prix-cell">1&nbsp;500&nbsp;FCFA<small>par mois</small></td>
+                <td>Élèves illimités, rappels des impayés, historique des séances.</td></tr>
+            </tbody>
+          </table>
+          <div class="boutons" style="display:flex;flex-wrap:wrap;gap:.8rem 1.3rem;align-items:center">
+            <a th:href="@{/inscription}" class="btn">Commencer avec la formule gratuite</a>
+            <a th:href="@{/formule}">Détails de la formule Solo</a>
           </div>
-          <div class="avantage">
-            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg></span>
-            <h3>Parents rassurés</h3><p>Un compte rendu après chaque séance, sur WhatsApp, l'appli que les parents ouvrent déjà.</p>
-          </div>
-          <div class="avantage">
-            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="13" rx="2.5"/><path d="M2.5 10.5h19M7 15h3"/></svg></span>
-            <h3>Payé à temps</h3><p>Factures PDF en FCFA, suivi des impayés et rappels Mobile Money.</p>
-          </div>
+          <p class="petit" style="margin-top:1rem">Vous êtes plusieurs répétiteurs dans une petite structure ? Une formule Agence est prévue, autour de 7&nbsp;000&nbsp;FCFA par mois.</p>
         </div>
       </div>
     </section>
 
-    <!-- TARIFS -->
-    <section class="section blanche" id="tarifs">
-      <div class="dedans centre">
-        <p class="surtitre">Tarifs</p>
-        <h2>Simple, en <span class="accent">FCFA</span></h2>
-        <p class="chapeau">Tarifs indicatifs. Paiement par Mobile Money (MTN MoMo, Moov Money, Celtiis Cash).</p>
-        <div class="tarifs apparait" style="text-align:left">
-          <div class="tarif">
-            <h3>Découverte</h3>
-            <div class="prix">0 FCFA <small>/ mois</small></div>
-            <ul><li>Jusqu'à 3 élèves</li><li>Comptes rendus WhatsApp</li><li>Factures PDF</li></ul>
-            <a th:href="@{/inscription}" class="btn bloc secondaire">Essayer</a>
-          </div>
-          <div class="tarif vedette">
-            <span class="etiquette">Le plus choisi</span>
-            <h3>Répétiteur solo</h3>
-            <div class="prix">1 500 FCFA <small>/ mois</small></div>
-            <ul><li>Élèves illimités</li><li>Relances des impayés</li><li>Historique des séances</li></ul>
-            <a th:href="@{/formule}" class="btn bloc">Choisir Solo</a>
-          </div>
+    <!-- QUESTIONS -->
+    <section class="section" id="questions">
+      <div class="dedans deux-col">
+        <div class="colle"><h2>Questions qu'on nous pose</h2></div>
+        <div class="questions">
+          <details open><summary>Il faut installer une application ?</summary>
+            <p>Non. RépétiPro s'ouvre dans le navigateur du téléphone (Chrome, par exemple). Vous pouvez l'ajouter à l'écran d'accueil.</p></details>
+          <details><summary>Ça consomme beaucoup de données ?</summary>
+            <p>Très peu : ce sont des pages simples, sans vidéo ni grosses images. Il faut quand même une connexion pour enregistrer.</p></details>
+          <details><summary>Je suis étudiant, j'ai seulement deux élèves.</summary>
+            <p>La formule gratuite est faite pour vous : jusqu'à 3 élèves, sans limite de durée.</p></details>
+          <details><summary>Comment je passe à la formule Solo ?</summary>
+            <p>Vous envoyez 1&nbsp;500&nbsp;FCFA par Mobile Money avec votre numéro en motif. Le compte est activé à la main, en général le jour même.</p></details>
         </div>
-        <p class="petit" style="margin-top:1.5rem">Vous gérez une petite agence avec plusieurs répétiteurs ? Une offre Agence est prévue (≈ 7 000 FCFA/mois, indicatif).</p>
       </div>
     </section>
 
-    <!-- APPEL À L'ACTION en dégradé -->
+    <!-- DERNIER APPEL -->
     <section class="appel">
       <div class="dedans">
         <div>
-          <p class="surtitre">Chaque séance compte</p>
-          <p class="grand">Lancez-vous ce soir, avec vos 3 premiers élèves.</p>
+          <p class="grand">Essayez avec vos élèves de ce mois-ci.</p>
+          <p class="petit" style="margin:.4rem 0 0">Trois élèves gratuits. Il faut deux minutes pour créer le compte.</p>
         </div>
-        <a th:href="@{/inscription}" class="btn clair">Créer mon compte gratuit</a>
+        <a th:href="@{/inscription}" class="btn clair">Créer mon compte</a>
       </div>
     </section>
   </main>
 
-  <footer class="pied">© 2026 RépétiPro · Cotonou, Bénin</footer>
+  <div class="bande-pagne" aria-hidden="true"></div>
+  <footer class="pied">
+    <div class="dedans">
+      <span>RépétiPro · fait à Cotonou, Bénin</span>
+      <span>© 2026 · <a th:href="@{/connexion}">Se connecter</a></span>
+    </div>
+  </footer>
 </body>
 </html>

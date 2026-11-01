@@ -6,22 +6,23 @@
 <head th:fragment="head(titre)">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#1f2544">
+  <meta name="theme-color" content="#24302b">
   <title th:text="${titre} + ' — RépétiPro'">RépétiPro</title>
-  <!-- Police Inter (Google Fonts) ; si pas de réseau, la police système prend le relais -->
+  <!-- Polices Google Fonts : Zilla Slab (titres), Atkinson Hyperlegible (texte), Caveat (annotations).
+       Sans réseau, les polices du téléphone prennent le relais (voir --titre / --texte dans style.css). -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Caveat:wght@600&family=Zilla+Slab:wght@500;600;700&display=swap">
   <link rel="stylesheet" th:href="@{/css/style.css}">
   <link rel="icon" th:href="@{/favicon.svg}" type="image/svg+xml">
 </head>
 
 <body>
 
-<!-- Logo : pastille ronde (livre ouvert) + nom + slogan -->
+<!-- Logo : une petite ardoise d'écolier (cadre en bois, trait de craie) + nom -->
 <a th:fragment="logo(lien)" th:href="${lien}" class="logo">
   <span class="pastille" aria-hidden="true">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5.5C4.5 4 8 4 12 6c4-2 7.5-2 10-.5V19c-2.5-1.5-6-1.5-10 .5-4-2-7.5-2-10-.5z"/><path d="M12 6v13.5"/></svg>
+    <svg viewBox="0 0 34 28"><rect x="1" y="1" width="32" height="26" rx="2.5" fill="#8a5a36"/><rect x="4" y="4" width="26" height="20" rx="1" fill="#24302b"/><path d="M8 17.5c2-4 3.6-6.6 5.2-6.6 1.8 0 .4 6 2.4 6s2.6-5.2 4.6-5.2c1.6 0 1.4 3.6 5.4 3.4" fill="none" stroke="#f2eee3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </span>
   <span><span class="nom">RépétiPro</span><span class="slogan">Cours à domicile · Bénin</span></span>
 </a>

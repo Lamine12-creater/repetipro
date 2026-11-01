@@ -3,10 +3,10 @@
 <head th:replace="~{fragments :: head('Mes élèves')}"></head>
 <body>
   <header th:replace="~{fragments :: barre}"></header>
-  <main class="contenu apparait" id="contenu">
+  <main class="contenu" id="contenu">
     <div class="carte-titre">
       <h1>Mes élèves</h1>
-      <a th:href="@{/eleves/nouveau}" class="btn petit-btn">+ Ajouter</a>
+      <a th:href="@{/eleves/nouveau}" class="btn petit-btn">Ajouter un élève</a>
     </div>
     <div th:replace="~{fragments :: messages}"></div>
 
@@ -18,25 +18,23 @@
 
     <section class="carte">
       <ul class="liste" th:unless="${eleves.isEmpty()}">
-        <li th:each="e : ${eleves}">
-          <span class="initiales" th:text="${e.initiales}">FE</span>
+        <li class="liste-entete" aria-hidden="true"><span>Élève</span><span>Parent</span><span>Tarif</span><span></span></li>
+        <li th:each="e : ${eleves}" class="ligne-eleve">
           <div class="infos">
             <strong th:text="${e.nom}">Nom</strong>
             <p class="petit" th:text="${e.classe + (e.matieres != null and !e.matieres.isBlank() ? ' · ' + e.matieres : '')}">3e · Maths</p>
-            <p class="petit">
-              <span th:text="${@fmt.fcfa(e.tarifMensuel)} + '/mois'">25 000 FCFA/mois</span>
-              <span th:if="${e.nomParent}" th:text="${' · ' + e.nomParent}"> · Mme X</span>
-            </p>
-            <div class="actions">
-              <a th:href="@{/eleves/{id}/modifier(id=${e.id})}" class="lien-discret">Modifier</a>
-              <form th:action="@{/eleves/{id}/archiver(id=${e.id})}" method="post"
-                    onsubmit="return confirm('Archiver cet élève ? Son historique est conservé.')">
-                <button type="submit" class="lien-discret">Archiver</button>
-              </form>
-            </div>
           </div>
-          <a th:if="${liensWhatsApp[e.id] != null}" class="btn petit-btn whatsapp" target="_blank" rel="noopener"
-             th:href="${liensWhatsApp[e.id]}">WhatsApp</a>
+          <div class="col-parent" th:text="${e.nomParent ?: '—'}">Mme X</div>
+          <div class="col-tarif"><span class="montant" th:text="${@fmt.fcfa(e.tarifMensuel)}">25 000 FCFA</span> / mois</div>
+          <div class="actions col-actions">
+            <a th:if="${liensWhatsApp[e.id] != null}" class="btn petit-btn whatsapp" target="_blank" rel="noopener"
+               th:href="${liensWhatsApp[e.id]}">WhatsApp</a>
+            <a th:href="@{/eleves/{id}/modifier(id=${e.id})}" class="lien-discret">Modifier</a>
+            <form th:action="@{/eleves/{id}/archiver(id=${e.id})}" method="post"
+                  onsubmit="return confirm('Archiver cet élève ? Son historique est conservé.')">
+              <button type="submit" class="lien-discret">Archiver</button>
+            </form>
+          </div>
         </li>
       </ul>
       <p th:if="${eleves.isEmpty()}" class="vide">Aucun élève pour l'instant.<br><a th:href="@{/eleves/nouveau}">Ajouter mon premier élève</a></p>

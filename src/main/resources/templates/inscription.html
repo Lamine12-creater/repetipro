@@ -5,9 +5,9 @@
   <header class="entete-site">
     <a th:replace="~{fragments :: logo(@{/})}"></a>
   </header>
-  <main class="page-connexion apparait" id="contenu">
-    <h1>Créer mon <span class="accent">compte</span></h1>
-    <p class="petit">Gratuit jusqu'à 3 élèves, sans carte bancaire</p>
+  <main class="page-connexion" id="contenu">
+    <h1>Créer mon compte</h1>
+    <p class="petit">Gratuit jusqu'à 3 élèves. On ne vous demande pas de carte bancaire.</p>
 
     <div class="carte">
       <!-- th:object lie le formulaire à InscriptionForm ; th:field remplit nom/valeur ; th:errors affiche les erreurs -->
@@ -27,7 +27,7 @@
         <p style="margin-top:1rem"><button type="submit" class="btn bloc">Créer mon compte</button></p>
       </form>
     </div>
-    <p class="petit" style="text-align:center;margin-top:.5rem">Déjà inscrit ? <a th:href="@{/connexion}">Se connecter</a></p>
+    <p class="apres">Déjà inscrit ? <a th:href="@{/connexion}">Se connecter</a></p>
   </main>
 </body>
 </html>

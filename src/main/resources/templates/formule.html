@@ -3,9 +3,9 @@
 <head th:replace="~{fragments :: head('Formule Solo')}"></head>
 <body>
   <header th:replace="~{fragments :: barre}"></header>
-  <main class="contenu apparait" id="contenu">
+  <main class="contenu" id="contenu">
     <div th:if="${param.limite}" class="alerte info">
-      🎉 Bravo, vous suivez déjà <strong th:text="${limite}">3</strong> élèves ! La formule gratuite s'arrête là :
+      Vous suivez déjà <strong th:text="${limite}">3</strong> élèves ! La formule gratuite s'arrête là :
       passez à la formule <strong>Solo</strong> pour en ajouter d'autres.
     </div>
 
@@ -16,7 +16,7 @@
     </section>
 
     <section class="carte">
-      <h2>💳 Comment payer</h2>
+      <h2>Comment payer</h2>
       <div class="alerte momo">
         Numéro Mobile Money RépétiPro : <strong th:text="${momoNumero}">01 XX XX XX XX</strong><br>
         Nom affiché : <span th:text="${momoNom}">REPETIPRO</span>
