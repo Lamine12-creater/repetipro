@@ -2,6 +2,7 @@ package bj.repetipro.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -40,6 +41,12 @@ public class Repetiteur {
 
     private LocalDateTime dateInscription = LocalDateTime.now();
 
+    /**
+     * Fin de la période Solo payée en ligne (incluse). Vide (null) = Solo activé à la main
+     * par l'admin, sans date de fin.
+     */
+    private LocalDate soloJusquAu;
+
     // --- Getters / setters (générés classiquement) ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -57,6 +64,21 @@ public class Repetiteur {
     public void setNomMomo(String nomMomo) { this.nomMomo = nomMomo; }
     public LocalDateTime getDateInscription() { return dateInscription; }
     public void setDateInscription(LocalDateTime dateInscription) { this.dateInscription = dateInscription; }
+    public LocalDate getSoloJusquAu() { return soloJusquAu; }
+    public void setSoloJusquAu(LocalDate soloJusquAu) { this.soloJusquAu = soloJusquAu; }
+
+    /**
+     * Vrai si le compte profite de Solo aujourd'hui : formule SOLO et, si elle a été payée
+     * en ligne, date de fin pas encore dépassée. Dans les gabarits : ${moi.soloActif}
+     */
+    public boolean isSoloActif() {
+        return plan == Plan.SOLO && (soloJusquAu == null || !soloJusquAu.isBefore(LocalDate.now()));
+    }
+
+    /** Vrai si la formule Solo payée en ligne est arrivée à échéance. */
+    public boolean isSoloExpire() {
+        return plan == Plan.SOLO && soloJusquAu != null && soloJusquAu.isBefore(LocalDate.now());
+    }
 
     /** Prénom (premier mot du nom) pour dire "Bonjour Rodrigue". */
     public String getPrenom() {

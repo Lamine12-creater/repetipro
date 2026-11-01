@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Paiement')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu etroit" id="contenu" th:with="s=${paiement.statut.name()}">
+
+    <!-- Payé -->
+    <section th:if="${s == 'PAYE'}" class="carte resultat-paiement ok">
+      <p class="tampon paye">Payé</p>
+      <h1>Paiement confirmé</h1>
+      <p>Merci ! <strong th:text="${@fmt.fcfa(paiement.montant)}">1 500 FCFA</strong> reçus.
+        Votre formule <strong>Solo</strong> est active jusqu'au
+        <strong th:text="${#temporals.format(paiement.soloJusquAu, 'dd/MM/yyyy')}">01/12/2026</strong> :
+        vous pouvez ajouter autant d'élèves que vous voulez.</p>
+    </section>
+
+    <!-- En attente -->
+    <section th:if="${s == 'EN_ATTENTE'}" class="carte resultat-paiement attente">
+      <p class="tampon attente">En attente</p>
+      <h1>Paiement en cours de confirmation</h1>
+      <p>Validez le paiement sur votre téléphone (code secret Mobile Money) si ce n'est pas déjà fait.
+        La confirmation arrive en général en moins d'une minute.</p>
+      <a th:href="@{/paiement/retour/{r}(r=${paiement.reference})}" class="btn bloc">Actualiser</a>
+    </section>
+
+    <!-- Échec / annulé / expiré / remboursé -->
+    <section th:if="${s != 'PAYE' and s != 'EN_ATTENTE'}" class="carte resultat-paiement echec">
+      <p class="tampon retard" th:text="${paiement.statut.libelle}">Échoué</p>
+      <h1 th:text="${s == 'REMBOURSE'} ? 'Paiement remboursé' : 'Paiement non abouti'">Paiement non abouti</h1>
+      <p th:if="${s != 'REMBOURSE'}">Aucun montant n'a été retenu pour ce paiement. Vérifiez votre solde Mobile Money
+        et réessayez, ou payez par transfert manuel.</p>
+      <form th:if="${s != 'REMBOURSE'}" th:action="@{/paiement/solo}" method="post">
+        <button type="submit" class="btn bloc">Réessayer : payer 1 500 FCFA</button>
+      </form>
+    </section>
+
+    <section class="carte">
+      <h2>Détails</h2>
+      <dl class="details-paiement">
+        <dt>Référence</dt><dd th:text="${paiement.reference}">RP20261101-ABCDE</dd>
+        <dt>Montant</dt><dd th:text="${@fmt.fcfa(paiement.montant)}">1 500 FCFA</dd>
+        <dt>Objet</dt><dd>Formule Solo, 1 mois</dd>
+        <dt>Réseau</dt><dd th:text="${paiement.moyenAffiche ?: '—'}">MTN MoMo</dd>
+        <dt>Créé le</dt><dd th:text="${#temporals.format(paiement.dateCreation, 'dd/MM/yyyy HH:mm')}">01/11/2026</dd>
+        <th:block th:if="${paiement.datePaiement != null}">
+          <dt>Payé le</dt><dd th:text="${#temporals.format(paiement.datePaiement, 'dd/MM/yyyy HH:mm')}">01/11/2026</dd>
+        </th:block>
+        <dt>Encaissé par</dt><dd th:text="${simulation} ? 'Simulation (aucun argent réel)' : 'FedaPay'">FedaPay</dd>
+      </dl>
+      <a th:href="@{/tableau-de-bord}" class="btn bloc secondaire">Retour à mon espace</a>
+      <p class="petit" style="margin-top:.6rem"><a th:href="@{/formule}">Voir la formule et mes paiements</a></p>
+    </section>
+  </main>
+  <nav th:replace="~{fragments :: navBas('')}"></nav>
+</body>
+</html>

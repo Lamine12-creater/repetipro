@@ -23,8 +23,13 @@
 
     <section class="carte">
       <h2>Mon abonnement</h2>
-      <p>Formule actuelle : <strong th:text="${moi.plan.name() == 'SOLO' ? 'Solo (élèves illimités)' : 'Gratuite (3 élèves max.)'}">Gratuite</strong></p>
-      <a th:if="${moi.plan.name() != 'SOLO'}" th:href="@{/formule}" class="btn bloc">Passer à Solo · 1 500 FCFA/mois</a>
+      <p>Formule actuelle : <strong th:text="${moi.soloActif ? 'Solo (élèves illimités)' : 'Gratuite (3 élèves max.)'}">Gratuite</strong></p>
+      <p th:if="${moi.soloActif and moi.soloJusquAu != null}" class="petit">Payée jusqu'au
+        <span th:text="${#temporals.format(moi.soloJusquAu, 'dd/MM/yyyy')}">01/12/2026</span>.
+        <a th:href="@{/formule}">Prolonger</a></p>
+      <p th:if="${moi.soloExpire}" class="petit">Votre formule Solo a pris fin le
+        <span th:text="${#temporals.format(moi.soloJusquAu, 'dd/MM/yyyy')}">01/10/2026</span>.</p>
+      <a th:if="${!moi.soloActif}" th:href="@{/formule}" class="btn bloc">Passer à Solo · 1 500 FCFA/mois</a>
     </section>
 
     <section class="carte">

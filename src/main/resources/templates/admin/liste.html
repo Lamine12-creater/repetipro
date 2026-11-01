@@ -5,7 +5,8 @@
   <header th:replace="~{fragments :: barre}"></header>
   <main class="contenu" id="contenu">
     <h1>Comptes répétiteurs</h1>
-    <p class="petit">Après réception d'un paiement Mobile Money, activez la formule Solo du compte concerné.</p>
+    <p class="petit">Les paiements en ligne (FedaPay) activent Solo tout seuls pour un mois. Après un transfert
+      Mobile Money manuel, activez ici la formule Solo du compte concerné (sans date de fin).</p>
     <div th:replace="~{fragments :: messages}"></div>
     <section class="carte">
       <ul class="liste">
@@ -13,7 +14,8 @@
           <span class="initiales" th:text="${c.initiales}">AB</span>
           <div class="infos">
             <strong th:text="${c.nomComplet}">Nom</strong>
-            <p class="petit" th:text="${@fmt.tel(c.telephone) + ' · inscrit le ' + #temporals.format(c.dateInscription, 'dd/MM/yyyy')}">01…</p>
+            <p class="petit" th:text="${@fmt.tel(c.telephone) + ' · inscrit le ' + #temporals.format(c.dateInscription, 'dd/MM/yyyy')
+                 + (c.soloJusquAu != null ? ' · Solo payé jusqu''au ' + #temporals.format(c.soloJusquAu, 'dd/MM/yyyy') : '')}">01…</p>
           </div>
           <form th:action="@{/admin/{id}/plan(id=${c.id}, plan=${c.plan.name() == 'SOLO' ? 'GRATUIT' : 'SOLO'})}" method="post">
             <button type="submit" class="btn petit-btn" th:classappend="${c.plan.name() == 'SOLO'} ? 'secondaire'"

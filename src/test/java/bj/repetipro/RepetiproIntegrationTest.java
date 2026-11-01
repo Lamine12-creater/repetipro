@@ -21,7 +21,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /** Tests d'intégration : l'application complète démarre avec une base H2 en mémoire. */
-@SpringBootTest
+// Paiement en ligne forcé à "non configuré", quelles que soient les variables de la machine.
+@SpringBootTest(properties = {"repetipro.paiement.simulation=false", "repetipro.fedapay.secret-key="})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class RepetiproIntegrationTest {
@@ -117,5 +118,16 @@ class RepetiproIntegrationTest {
         mvc.perform(get("/tableau-de-bord")).andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("**/connexion"));
         mvc.perform(get("/")).andExpect(status().isOk());
+    }
+
+    @Test
+    void sansCleFedaPayLaPageFormuleGardeLePaiementManuelSeulement() throws Exception {
+        mvc.perform(get("/formule")).andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Comment payer")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Payer 1 500 FCFA par Mobile Money"))));
+        Repetiteur r = nouveauRepetiteur();
+        UtilisateurConnecte moi = (UtilisateurConnecte) repetiteurs.loadUserByUsername(r.getTelephone());
+        mvc.perform(post("/paiement/solo").with(user(moi)).with(csrf()))
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/formule"));
     }
 }

@@ -17,10 +17,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filtres(HttpSecurity http) throws Exception {
         http
+            // Pas de jeton CSRF pour le webhook (FedaPay ne peut pas en avoir) : la signature HMAC le remplace.
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/paiement/webhook/**"))
             .authorizeHttpRequests(regles -> regles
                 // Pages accessibles sans compte
                 .requestMatchers("/", "/connexion", "/inscription", "/formule",
                                  "/css/**", "/favicon.svg", "/favicon.ico", "/error").permitAll()
+                // Webhook FedaPay : appelé par les serveurs FedaPay (sans session) ; protégé par
+                // la signature X-FEDAPAY-SIGNATURE vérifiée dans PaiementService.
+                .requestMatchers("/paiement/webhook/**").permitAll()
                 // Espace admin : seulement les numéros admin
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 // Tout le reste : il faut être connecté

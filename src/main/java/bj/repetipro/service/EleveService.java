@@ -1,7 +1,6 @@
 package bj.repetipro.service;
 
 import bj.repetipro.model.Eleve;
-import bj.repetipro.model.Plan;
 import bj.repetipro.model.Repetiteur;
 import bj.repetipro.repository.EleveRepository;
 import bj.repetipro.util.Telephones;
@@ -43,7 +42,7 @@ public class EleveService {
     /** Vrai si le répétiteur peut encore ajouter un élève actif. */
     public boolean peutAjouter(Long repetiteurId) {
         Repetiteur r = repetiteurs.trouver(repetiteurId);
-        return r.getPlan() == Plan.SOLO || repo.countByRepetiteurIdAndActifTrue(repetiteurId) < LIMITE_GRATUITE;
+        return r.isSoloActif() || repo.countByRepetiteurIdAndActifTrue(repetiteurId) < LIMITE_GRATUITE;
     }
 
     @Transactional

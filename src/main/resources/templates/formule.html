@@ -8,15 +8,60 @@
       Vous suivez déjà <strong th:text="${limite}">3</strong> élèves ! La formule gratuite s'arrête là :
       passez à la formule <strong>Solo</strong> pour en ajouter d'autres.
     </div>
+    <div th:replace="~{fragments :: messages}"></div>
 
+    <div class="colonnes">
+    <div>
     <section class="carte tarif vedette">
       <h1>Formule Solo</h1>
       <div class="prix">1 500 FCFA <small>/ mois</small></div>
       <ul><li>Élèves illimités</li><li>Comptes rendus et rappels WhatsApp</li><li>Factures PDF</li></ul>
+      <th:block th:if="${moi != null}">
+        <p th:if="${moi.soloActif and moi.soloJusquAu != null}" class="etat-abonnement actif">
+          Votre formule Solo est active jusqu'au <strong th:text="${#temporals.format(moi.soloJusquAu, 'dd/MM/yyyy')}">01/12/2026</strong>.</p>
+        <p th:if="${moi.soloActif and moi.soloJusquAu == null}" class="etat-abonnement actif">
+          Votre formule Solo est active (activée par l'équipe RépétiPro).</p>
+        <p th:if="${moi.soloExpire}" class="etat-abonnement expire">
+          Votre formule Solo a pris fin le <strong th:text="${#temporals.format(moi.soloJusquAu, 'dd/MM/yyyy')}">01/10/2026</strong>.</p>
+      </th:block>
     </section>
 
+    <!-- Paiement en ligne : FedaPay (ou la caisse de simulation en développement) -->
+    <section th:if="${paiementEnLigne}" class="carte payer-en-ligne">
+      <h2>Payer par Mobile Money</h2>
+      <p>MTN MoMo, Moov Money ou Celtiis Cash. Vous validez le paiement sur votre téléphone ;
+        votre compte passe en Solo pour un mois dès la confirmation, sans attendre l'équipe.</p>
+      <p class="reseaux-acceptes" aria-label="Réseaux acceptés">
+        <span class="reseau mtn">MTN MoMo</span><span class="reseau moov">Moov Money</span><span class="reseau celtiis">Celtiis Cash</span>
+      </p>
+      <form th:if="${moi != null}" th:action="@{/paiement/solo}" method="post">
+        <button type="submit" class="btn bloc" id="payer-solo"
+                th:text="${moi.soloActif and moi.soloJusquAu != null ? 'Prolonger d''un mois : payer 1 500 FCFA' : 'Payer 1 500 FCFA par Mobile Money'}">Payer 1 500 FCFA par Mobile Money</button>
+      </form>
+      <a th:if="${moi == null}" th:href="@{/connexion}" class="btn bloc">Se connecter pour payer</a>
+      <p class="petit" style="margin-top:.6rem">Paiement sécurisé par FedaPay. Un mois payé s'ajoute à la fin de votre mois en cours.</p>
+      <p th:if="${modeSimulation}" class="note-simulation">Mode simulation (développement) : aucun argent réel n'est débité.</p>
+      <p th:if="${modeSandbox}" class="note-simulation">Mode test FedaPay (sandbox) : aucun argent réel n'est débité.</p>
+    </section>
+
+    <section th:if="${moi != null and !mesPaiements.isEmpty()}" class="carte">
+      <h2>Mes paiements</h2>
+      <ul class="liste">
+        <li th:each="p : ${mesPaiements}">
+          <div class="infos">
+            <strong th:text="${@fmt.fcfa(p.montant)}">1 500 FCFA</strong>
+            <p class="petit" th:text="${#temporals.format(p.dateCreation, 'dd/MM/yyyy HH:mm') + ' · ' + p.reference}">01/11/2026 · RP…</p>
+          </div>
+          <a class="badge" th:href="@{/paiement/retour/{r}(r=${p.reference})}"
+             th:classappend="${p.statut.name() == 'PAYE'} ? 'paye' : (${p.statut.name() == 'EN_ATTENTE'} ? 'attente' : 'retard')"
+             th:text="${p.statut.libelle}">Payé</a>
+        </li>
+      </ul>
+    </section>
+    </div>
+
     <section class="carte">
-      <h2>Comment payer</h2>
+      <h2 th:text="${paiementEnLigne} ? 'Ou par transfert manuel' : 'Comment payer'">Comment payer</h2>
       <div class="alerte momo">
         Numéro Mobile Money RépétiPro : <strong th:text="${momoNumero}">01 XX XX XX XX</strong><br>
         Nom affiché : <span th:text="${momoNom}">REPETIPRO</span>
@@ -29,6 +74,7 @@
       </ol>
       <a th:href="@{/tableau-de-bord}" class="btn bloc secondaire">Retour à mon espace</a>
     </section>
+    </div>
   </main>
   <th:block th:if="${moi != null}"><nav th:replace="~{fragments :: navBas('')}"></nav></th:block>
 </body>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Caisse de simulation')}"></head>
+<!-- Fausse page de paiement, UNIQUEMENT en développement (PAIEMENT_SIMULATION=true).
+     En vrai, cette étape se passe sur la page sécurisée de FedaPay. -->
+<body class="page-caisse">
+  <div class="bandeau-simulation" role="note">Simulation : aucun argent réel n'est débité</div>
+  <main class="page-connexion" id="contenu">
+    <p class="surtitre">Caisse de test, à la place de FedaPay</p>
+    <h1>Paiement Mobile Money</h1>
+    <div class="carte caisse">
+      <dl class="details-paiement">
+        <dt>Marchand</dt><dd>RépétiPro</dd>
+        <dt>Objet</dt><dd>Formule Solo, 1 mois</dd>
+        <dt>Référence</dt><dd th:text="${paiement.reference}">RP…</dd>
+      </dl>
+      <p class="montant-caisse" th:text="${@fmt.fcfa(paiement.montant)}">1 500 FCFA</p>
+
+      <form th:action="@{/paiement/simulation/{r}(r=${paiement.reference})}" method="post">
+        <label style="margin-top:0" id="l-reseau">Réseau</label>
+        <div class="choix-reseau" role="radiogroup" aria-labelledby="l-reseau">
+          <input type="radio" id="r-mtn" name="reseau" value="mtn_open" checked><label for="r-mtn">MTN MoMo</label>
+          <input type="radio" id="r-moov" name="reseau" value="moov"><label for="r-moov">Moov Money</label>
+          <input type="radio" id="r-celtiis" name="reseau" value="sbin"><label for="r-celtiis">Celtiis Cash</label>
+        </div>
+        <label for="numero">Numéro Mobile Money</label>
+        <input id="numero" name="numero" type="tel" inputmode="tel" th:value="${@fmt.tel(moi.telephone)}" readonly>
+        <p class="petit">Dans la vraie caisse, vous recevez ici une demande de validation sur votre téléphone.</p>
+        <p style="margin-top:1rem"><button type="submit" name="action" value="payer" class="btn bloc" id="sim-payer">Confirmer le paiement</button></p>
+        <div class="grille-2" style="margin-top:.6rem">
+          <button type="submit" name="action" value="echec" class="btn secondaire" id="sim-echec">Simuler un échec</button>
+          <button type="submit" name="action" value="annuler" class="btn secondaire" id="sim-annuler">Annuler</button>
+        </div>
+      </form>
+    </div>
+    <p class="apres petit">La confirmation passe par le même webhook signé que FedaPay.</p>
+  </main>
+</body>
+</html>

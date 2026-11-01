@@ -4,6 +4,6 @@ package bj.repetipro.model;
 public enum Plan {
     /** Gratuit : 3 élèves actifs maximum. */
     GRATUIT,
-    /** Solo : élèves illimités (1 500 FCFA/mois, activé à la main par l'admin). */
+    /** Solo : élèves illimités (1 500 FCFA/mois, payé en ligne ou activé à la main par l'admin). */
     SOLO
 }

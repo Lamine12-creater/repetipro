@@ -16,8 +16,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class AccueilController {
 
     private final RepetiteurService repetiteurs;
+    private final bj.repetipro.paiement.ConfigPaiement configPaiement;
+    private final bj.repetipro.paiement.PaiementService paiements;
 
-    public AccueilController(RepetiteurService repetiteurs) { this.repetiteurs = repetiteurs; }
+    public AccueilController(RepetiteurService repetiteurs, bj.repetipro.paiement.ConfigPaiement configPaiement,
+                             bj.repetipro.paiement.PaiementService paiements) {
+        this.repetiteurs = repetiteurs;
+        this.configPaiement = configPaiement;
+        this.paiements = paiements;
+    }
 
     @GetMapping("/")
     public String accueil() { return "index"; }
@@ -47,14 +54,19 @@ public class AccueilController {
         return "redirect:/tableau-de-bord?bienvenue";
     }
 
-    /** Explique comment passer à la formule Solo (paiement MoMo manuel). */
+    /** Formule Solo : paiement en ligne (FedaPay / simulation) et, toujours, le transfert manuel. */
     @GetMapping("/formule")
     public String formule(Model model,
+                          @org.springframework.security.core.annotation.AuthenticationPrincipal bj.repetipro.service.UtilisateurConnecte moi,
                           @org.springframework.beans.factory.annotation.Value("${repetipro.paiement.momo-numero}") String numero,
                           @org.springframework.beans.factory.annotation.Value("${repetipro.paiement.momo-nom}") String nom) {
         model.addAttribute("momoNumero", numero);
         model.addAttribute("momoNom", nom);
         model.addAttribute("limite", bj.repetipro.service.EleveService.LIMITE_GRATUITE);
+        model.addAttribute("paiementEnLigne", configPaiement.paiementEnLigneDisponible());
+        model.addAttribute("modeSimulation", configPaiement.simulationActive());
+        model.addAttribute("modeSandbox", !configPaiement.simulationActive() && configPaiement.fedapayConfigure() && !configPaiement.estLive());
+        model.addAttribute("mesPaiements", moi == null ? java.util.List.of() : paiements.derniers(moi.getId()));
         return "formule";
     }
 }

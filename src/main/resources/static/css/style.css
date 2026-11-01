@@ -428,3 +428,49 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--i
   .contenu { padding-bottom: 3rem; }
   .colonnes { display: grid; grid-template-columns: 3fr 2fr; gap: 1.2rem; align-items: start; }
 }
+
+/* ==========================================================
+   Paiement en ligne (Solo) : formule, caisse de simulation, retour
+   ========================================================== */
+.etat-abonnement { margin: .8rem 0 0; padding-top: .6rem; border-top: 1px solid var(--bord); font-size: .95rem; }
+.etat-abonnement.actif { color: var(--vert); }
+.etat-abonnement.expire { color: var(--rouge); }
+.payer-en-ligne { border-top: 3px solid var(--terre); }
+.reseaux-acceptes { display: flex; flex-wrap: wrap; gap: .4rem; margin: .2rem 0 1rem; }
+.reseau { font-size: .8rem; font-weight: 700; padding: .15rem .55rem; border: 1.5px solid; border-radius: 3px; background: #fff; }
+.reseau.mtn { border-color: #c79a00; color: #6b5200; background: #fff6cf; }
+.reseau.moov { border-color: #1d5fa8; color: #1d4f8a; background: #e6eefa; }
+.reseau.celtiis { border-color: #7a3e8f; color: #6a2f7e; background: #f3e8f6; }
+.note-simulation { margin: .6rem 0 0; font-size: .85rem; padding: .35rem .6rem; border: 1.5px dashed var(--muet); color: var(--muet); }
+
+.contenu.etroit { max-width: 640px; }
+.resultat-paiement { border-top: 3px solid var(--terre); }
+.resultat-paiement.ok { border-top-color: var(--vert); }
+.resultat-paiement.attente { border-top-color: var(--jaune); }
+.resultat-paiement.echec { border-top-color: var(--rouge); }
+.resultat-paiement h1 { margin-top: .2rem; }
+.tampon {
+  display: inline-block; margin: 0 0 .5rem; font-family: var(--titre); font-weight: 700; font-size: .9rem;
+  text-transform: uppercase; letter-spacing: .06em; padding: .12rem .6rem; border: 2px solid currentColor;
+  border-radius: 3px; transform: rotate(-2deg);
+}
+.tampon.paye { color: var(--vert); background: var(--vert-clair); }
+.tampon.attente { color: #8a5a00; background: var(--orange-clair); }
+.tampon.retard { color: var(--rouge); background: var(--rouge-clair); }
+.details-paiement { display: grid; grid-template-columns: max-content 1fr; gap: .35rem 1rem; margin: .2rem 0 1rem; font-size: .93rem; }
+.details-paiement dt { color: var(--muet); }
+.details-paiement dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+
+.page-caisse { background: #eef0ec; }
+.bandeau-simulation {
+  background: var(--ardoise); color: var(--craie-jaune); text-align: center; font-weight: 700; font-size: .85rem;
+  letter-spacing: .04em; text-transform: uppercase; padding: .55rem 1rem; border-bottom: 3px dashed var(--craie-jaune);
+}
+.caisse .montant-caisse { font-family: var(--titre); font-size: 2.2rem; font-weight: 700; margin: .2rem 0 .4rem; text-align: center;
+  padding: .5rem 0; border-top: 1px solid var(--bord); border-bottom: 1px solid var(--bord); font-variant-numeric: tabular-nums; }
+.choix-reseau { display: grid; grid-template-columns: repeat(3, 1fr); border: 1.5px solid var(--encre); border-radius: var(--rayon); overflow: hidden; }
+.choix-reseau input { position: absolute; opacity: 0; pointer-events: none; }
+.choix-reseau label { margin: 0; text-align: center; padding: .7rem .2rem; font-size: .9rem; cursor: pointer; background: #fff; }
+.choix-reseau label + input + label { border-left: 1.5px solid var(--encre); }
+.choix-reseau input:checked + label { background: var(--encre); color: var(--feuille); }
+.choix-reseau input:focus-visible + label { outline: 2px solid var(--terre); outline-offset: -4px; }

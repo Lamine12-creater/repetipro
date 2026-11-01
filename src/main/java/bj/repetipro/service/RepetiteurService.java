@@ -84,6 +84,9 @@ public class RepetiteurService implements UserDetailsService {
 
     @Transactional
     public void changerPlan(Long id, Plan plan) {
-        trouver(id).setPlan(plan);
+        Repetiteur r = trouver(id);
+        r.setPlan(plan);
+        // Activation/retrait manuel par l'admin : pas de date de fin (géré à la main).
+        r.setSoloJusquAu(null);
     }
 }

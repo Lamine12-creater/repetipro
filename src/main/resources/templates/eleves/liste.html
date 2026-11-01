@@ -11,7 +11,7 @@
     <div th:replace="~{fragments :: messages}"></div>
 
     <!-- Rappel de la limite gratuite -->
-    <div th:if="${moi.plan.name() == 'GRATUIT'}" class="alerte info">
+    <div th:if="${!moi.soloActif}" class="alerte info">
       Formule gratuite : <strong th:text="${eleves.size() + ' / ' + limite}">2 / 3</strong> élèves.
       <a th:href="@{/formule}">Passer à Solo</a> pour un nombre illimité.
     </div>
