@@ -1,0 +1,27 @@
+# Blueprint Render : New → Blueprint → ce dépôt.
+# Neon reste hors Blueprint (base gratuite durable) : coller DATABASE_URL à la création.
+services:
+  - type: web
+    name: repetipro
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_TELEPHONES
+        sync: false
+      - key: PAIEMENT_MOMO_NUMERO
+        sync: false
+      - key: PAIEMENT_MOMO_NOM
+        sync: false
+      - key: REMEMBER_ME_KEY
+        generateValue: true
+      - key: APP_BASE_URL
+        sync: false
+      - key: FEDAPAY_SECRET_KEY
+        sync: false
+      - key: FEDAPAY_WEBHOOK_SECRET
+        sync: false
+      - key: FEDAPAY_ENV
+        value: sandbox

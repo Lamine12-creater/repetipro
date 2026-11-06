@@ -143,7 +143,11 @@ git push -u origin main
 
 5. *Create Web Service*. Le premier déploiement prend quelques minutes. Votre site est ensuite
    disponible à l'adresse `https://repetipro-xxxx.onrender.com`.
-6. Inscrivez-vous sur le site avec le numéro mis dans `ADMIN_TELEPHONES` : vous aurez accès
+6. *Alternative plus rapide* : *New* → *Blueprint* → ce dépôt. Render lit `render.yaml`,
+   crée le service Docker gratuit, et vous demande seulement les variables marquées
+   (surtout `DATABASE_URL` Neon, `ADMIN_TELEPHONES`, et éventuellement FedaPay).
+
+7. Inscrivez-vous sur le site avec le numéro mis dans `ADMIN_TELEPHONES` : vous aurez accès
    à `/admin` (lien dans *Paramètres*).
 
 Le `Dockerfile` active le profil `prod` (PostgreSQL), limite la mémoire Java à 350 Mo et règle
