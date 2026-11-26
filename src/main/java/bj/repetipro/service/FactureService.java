@@ -117,7 +117,7 @@ public class FactureService {
         StringBuilder m = new StringBuilder();
         m.append("Bonjour").append(e.getNomParent() == null || e.getNomParent().isBlank() ? "" : " " + e.getNomParent())
          .append(",\nVoici la facture ").append(deMois(f.getPeriode())).append(" pour ").append(e.getPrenom())
-         .append(" : ").append(Montants.fcfa(f.getMontant()));
+         .append(" : tarif mensuel fixe de ").append(Montants.fcfa(f.getMontant()));
         if (f.getNombreSeances() > 0) m.append(" (").append(f.getNombreSeances()).append(" séance(s))");
         m.append(".\n");
         if (r.getNumeroMomo() != null) {

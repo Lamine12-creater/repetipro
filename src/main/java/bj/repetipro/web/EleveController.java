@@ -1,6 +1,9 @@
 package bj.repetipro.web;
 
+import bj.repetipro.model.Classe;
+import bj.repetipro.model.Eleve;
 import bj.repetipro.service.EleveService;
+import bj.repetipro.service.TarifService;
 import bj.repetipro.service.LimiteGratuiteException;
 import bj.repetipro.service.UtilisateurConnecte;
 import bj.repetipro.util.Telephones;
@@ -18,12 +21,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class EleveController {
 
     private final EleveService eleves;
-
     private final bj.repetipro.service.RepetiteurService repetiteurs;
+    private final TarifService tarifs;
 
-    public EleveController(EleveService eleves, bj.repetipro.service.RepetiteurService repetiteurs) {
+    public EleveController(EleveService eleves, bj.repetipro.service.RepetiteurService repetiteurs, TarifService tarifs) {
         this.eleves = eleves;
         this.repetiteurs = repetiteurs;
+        this.tarifs = tarifs;
     }
 
     @GetMapping
@@ -51,6 +55,7 @@ public class EleveController {
         if (!eleves.peutAjouter(moi.getId())) return "redirect:/formule?limite";
         model.addAttribute("form", new EleveForm());
         model.addAttribute("eleveId", null);
+        preparerFormulaire(model, moi.getId(), null);
         return "eleves/formulaire";
     }
 
@@ -59,8 +64,10 @@ public class EleveController {
                         @Valid @ModelAttribute("form") EleveForm form, BindingResult erreurs,
                         Model model, RedirectAttributes flash) {
         verifierWhatsApp(form, erreurs);
+        verifierClasse(form, erreurs, null);
         if (erreurs.hasErrors()) {
             model.addAttribute("eleveId", null);
+            preparerFormulaire(model, moi.getId(), null);
             return "eleves/formulaire";
         }
         try {
@@ -74,8 +81,10 @@ public class EleveController {
 
     @GetMapping("/{id}/modifier")
     public String modifier(@AuthenticationPrincipal UtilisateurConnecte moi, @PathVariable Long id, Model model) {
-        model.addAttribute("form", EleveForm.depuis(eleves.trouver(id, moi.getId())));
+        Eleve e = eleves.trouver(id, moi.getId());
+        model.addAttribute("form", EleveForm.depuis(e));
         model.addAttribute("eleveId", id);
+        preparerFormulaire(model, moi.getId(), e);
         return "eleves/formulaire";
     }
 
@@ -83,9 +92,12 @@ public class EleveController {
     public String enregistrer(@AuthenticationPrincipal UtilisateurConnecte moi, @PathVariable Long id,
                               @Valid @ModelAttribute("form") EleveForm form, BindingResult erreurs,
                               Model model, RedirectAttributes flash) {
+        Eleve existant = eleves.trouver(id, moi.getId());
         verifierWhatsApp(form, erreurs);
+        verifierClasse(form, erreurs, existant);
         if (erreurs.hasErrors()) {
             model.addAttribute("eleveId", id);
+            preparerFormulaire(model, moi.getId(), existant);
             return "eleves/formulaire";
         }
         eleves.modifier(id, moi.getId(), form);
@@ -116,6 +128,31 @@ public class EleveController {
         String n = form.getWhatsappParent();
         if (n != null && !n.isBlank() && !Telephones.estValide(n)) {
             erreurs.rejectValue("whatsappParent", "invalide", "Numéro invalide. Exemple : 01 97 00 00 00");
+        }
+    }
+
+    /** Nouvelle fiche : uniquement une classe officielle. Modification : on accepte aussi l'ancienne saisie libre. */
+    private void verifierClasse(EleveForm form, BindingResult erreurs, Eleve existant) {
+        String saisie = form.getClasse();
+        if (saisie == null || saisie.isBlank()) return; // @NotBlank s'en charge
+        if (Classe.de(saisie) != null) return;
+        if (existant != null && existant.getClasse() != null && existant.getClasse().equals(saisie.trim())) return;
+        erreurs.rejectValue("classe", "inconnue", "Choisissez une classe dans la liste.");
+    }
+
+    private void preparerFormulaire(Model model, Long repetiteurId, Eleve existant) {
+        java.util.Map<String, Integer> grille = tarifs.grille(repetiteurId);
+        model.addAttribute("classes", Classe.values());
+        model.addAttribute("grille", grille);
+        if (existant != null) {
+            Classe c = Classe.de(existant.getClasse());
+            model.addAttribute("classeActuelle", c != null ? c.getLibelle() : existant.getClasse());
+            model.addAttribute("tarifActuel", existant.getTarifMensuel());
+            model.addAttribute("classeLibre", c == null);
+            Integer duGrille = c == null ? null : grille.get(c.getLibelle());
+            model.addAttribute("tarifAncien", duGrille != null && existant.getTarifMensuel() != duGrille);
+        } else {
+            model.addAttribute("classeLibre", false);
         }
     }
 }

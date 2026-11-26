@@ -15,13 +15,26 @@
       <div class="grille-2">
         <div>
           <label for="classe">Classe</label>
-          <input id="classe" th:field="*{classe}" placeholder="3e, Tle D…" required>
+          <select id="classe" th:field="*{classe}" required
+                  th:attr="data-classe-depart=${classeActuelle}">
+            <option value="">Choisir la classe</option>
+            <option th:each="c : ${classes}"
+                    th:value="${c.libelle}"
+                    th:attr="data-montant=${grille[c.libelle]}"
+                    th:text="${c.libelle}">3ème</option>
+            <!-- Ancienne saisie libre, conservée jusqu'au choix d'une classe officielle -->
+            <option th:if="${classeLibre}"
+                    th:value="${classeActuelle}"
+                    th:attr="data-montant=${tarifActuel}"
+                    th:text="${classeActuelle}">Autre</option>
+          </select>
           <p class="erreur-champ" th:if="${#fields.hasErrors('classe')}" th:errors="*{classe}"></p>
         </div>
         <div>
-          <label for="tarif">Tarif mensuel (FCFA)</label>
-          <input id="tarif" th:field="*{tarifMensuel}" type="number" min="0" step="500" inputmode="numeric" required>
-          <p class="erreur-champ" th:if="${#fields.hasErrors('tarifMensuel')}" th:errors="*{tarifMensuel}"></p>
+          <label>Montant mensuel</label>
+          <p id="montant-affiche" class="montant-fixe vide"
+             th:attr="data-tarif-actuel=${tarifActuel}">—</p>
+          <p id="montant-note" class="petit">Fixé par votre <a href="/tarifs">grille de tarifs</a>. Ce n'est pas négocié avec les parents.</p>
         </div>
       </div>
 
@@ -43,5 +56,38 @@
     </form>
   </main>
   <nav th:replace="~{fragments :: navBas('eleves')}"></nav>
+  <script>
+    (function () {
+      var sel = document.getElementById('classe');
+      var aff = document.getElementById('montant-affiche');
+      if (!sel || !aff) return;
+      var actuel = parseInt(aff.getAttribute('data-tarif-actuel') || '', 10);
+      var depart = sel.getAttribute('data-classe-depart') || '';
+      function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + ' FCFA'; }
+      function maj() {
+        var opt = sel.options[sel.selectedIndex];
+        var m = opt && opt.getAttribute('data-montant');
+        var note = document.getElementById('montant-note');
+        if (!m) {
+          aff.textContent = 'Choisissez une classe';
+          aff.classList.add('vide');
+          return;
+        }
+        aff.classList.remove('vide');
+        var montant = parseInt(m, 10);
+        var meme = depart && sel.value === depart;
+        var defaut = 'Fixé par votre grille de tarifs. Ce n\'est pas négocié avec les parents.';
+        if (meme && actuel && actuel !== montant) {
+          aff.textContent = fmt(actuel);
+          if (note) note.innerHTML = 'Ancien tarif conservé. Il passera à ' + fmt(montant) + ' si vous changez de classe.';
+        } else {
+          aff.textContent = fmt(montant);
+          if (note) note.innerHTML = defaut + ' <a href="/tarifs">Modifier les tarifs</a>.';
+        }
+      }
+      sel.addEventListener('change', maj);
+      maj();
+    })();
+  </script>
 </body>
 </html>

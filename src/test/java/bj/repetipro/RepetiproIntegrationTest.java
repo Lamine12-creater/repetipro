@@ -31,6 +31,7 @@ class RepetiproIntegrationTest {
     @Autowired EleveService eleves;
     @Autowired SeanceService seances;
     @Autowired FactureService factures;
+    @Autowired TarifService tarifs;
     @Autowired SeanceRepository seanceRepo;
     @Autowired FactureRepository factureRepo;
     @Autowired MockMvc mvc;
@@ -44,7 +45,7 @@ class RepetiproIntegrationTest {
     private EleveForm eleve(String nom, int tarif) {
         EleveForm f = new EleveForm();
         f.setNom(nom);
-        f.setClasse("3e");
+        f.setClasse("5ème");
         f.setMatieres("Maths");
         f.setNomParent("Parent Test");
         f.setWhatsappParent("01 00 00 00 09");
@@ -55,7 +56,7 @@ class RepetiproIntegrationTest {
     @Test
     void laFactureMensuelleVautLeTarifEtCompteLesSeancesFaites() {
         Repetiteur r = nouveauRepetiteur();
-        Eleve e = eleves.creer(r.getId(), eleve("Élève Un", 25000));
+        Eleve e = eleves.creer(r.getId(), eleve("Élève Un", 99)); // 99 doit être ignoré
         YearMonth mois = YearMonth.of(2026, 9);
         Seance s1 = seances.planifier(r.getId(), e.getId(), mois.atDay(3).atTime(16, 0), 120);
         Seance s2 = seances.planifier(r.getId(), e.getId(), mois.atDay(5).atTime(16, 0), 120);
@@ -129,5 +130,58 @@ class RepetiproIntegrationTest {
         UtilisateurConnecte moi = (UtilisateurConnecte) repetiteurs.loadUserByUsername(r.getTelephone());
         mvc.perform(post("/paiement/solo").with(user(moi)).with(csrf()))
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/formule"));
+    }
+
+    @Test
+    void leTarifVientDeLaGrilleEtIgnoreLeMontantClient() {
+        Repetiteur r = nouveauRepetiteur();
+        Eleve e = eleves.creer(r.getId(), eleve("Kossi", 1));
+        assertEquals("5ème", e.getClasse());
+        assertEquals(25_000, e.getTarifMensuel());
+
+        java.util.Map<String, String> grille = new java.util.HashMap<>();
+        for (Classe c : Classe.values()) grille.put(c.name(), String.valueOf(c.getTarifDefaut()));
+        grille.put("CINQUIEME", "27000");
+        assertNull(tarifs.enregistrer(r.getId(), grille));
+
+        EleveForm f = eleve("Kossi", 1);
+        f.setClasse("5ème");
+        eleves.modifier(e.getId(), r.getId(), f);
+        assertEquals(25_000, eleves.trouver(e.getId(), r.getId()).getTarifMensuel(),
+                "même classe : l'ancien tarif est conservé");
+
+        f.setClasse("3ème");
+        eleves.modifier(e.getId(), r.getId(), f);
+        Eleve apres = eleves.trouver(e.getId(), r.getId());
+        assertEquals("3ème", apres.getClasse());
+        assertEquals(30_000, apres.getTarifMensuel());
+
+        f.setClasse("5ème");
+        eleves.modifier(e.getId(), r.getId(), f);
+        assertEquals(27_000, eleves.trouver(e.getId(), r.getId()).getTarifMensuel(),
+                "changement de classe : nouveau tarif de la grille");
+    }
+
+    @Test
+    void leFormulaireEleveNAplusDeChampTarifLibreEtLaPageTarifsEstProtegee() throws Exception {
+        Repetiteur r = nouveauRepetiteur();
+        UtilisateurConnecte moi = (UtilisateurConnecte) repetiteurs.loadUserByUsername(r.getTelephone());
+        mvc.perform(get("/tarifs")).andExpect(status().is3xxRedirection());
+        mvc.perform(get("/tarifs").with(user(moi))).andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tarifs mensuels")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("25")));
+        mvc.perform(get("/eleves/nouveau").with(user(moi))).andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"classe\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-montant")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("name=\"tarifMensuel\""))));
+        mvc.perform(post("/eleves").with(user(moi)).with(csrf())
+                        .param("nom", "Fifamè")
+                        .param("classe", "Tle")
+                        .param("tarifMensuel", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/eleves"));
+        Eleve e = eleves.actifs(r.getId()).get(0);
+        assertEquals("Tle", e.getClasse());
+        assertEquals(60_000, e.getTarifMensuel());
     }
 }

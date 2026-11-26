@@ -1,8 +1,10 @@
 package bj.repetipro.web;
 
+import bj.repetipro.model.Classe;
 import bj.repetipro.model.Eleve;
 import bj.repetipro.util.Telephones;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 /**
  * Formulaire élève. On n'expose pas directement l'entité Eleve au formulaire :
@@ -27,16 +29,15 @@ public class EleveForm {
     /** Facultatif, mais s'il est rempli il doit être un numéro béninois valide (vérifié dans le contrôleur). */
     private String whatsappParent;
 
-    @NotNull(message = "Tarif obligatoire")
-    @Min(value = 0, message = "Le tarif ne peut pas être négatif")
-    @Max(value = 1_000_000, message = "Tarif trop élevé")
+    /** Affiché seulement : le serveur ignore cette valeur et lit la grille de tarifs. */
     private Integer tarifMensuel;
 
     /** Pré-remplit le formulaire avec un élève existant (modification). */
     public static EleveForm depuis(Eleve e) {
         EleveForm f = new EleveForm();
         f.nom = e.getNom();
-        f.classe = e.getClasse();
+        Classe c = Classe.de(e.getClasse());
+        f.classe = c != null ? c.getLibelle() : e.getClasse();
         f.matieres = e.getMatieres();
         f.nomParent = e.getNomParent();
         f.whatsappParent = e.getWhatsappParent() == null ? null : Telephones.afficher(e.getWhatsappParent());

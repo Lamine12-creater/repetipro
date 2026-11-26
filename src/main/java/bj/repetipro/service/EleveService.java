@@ -1,5 +1,6 @@
 package bj.repetipro.service;
 
+import bj.repetipro.model.Classe;
 import bj.repetipro.model.Eleve;
 import bj.repetipro.model.Repetiteur;
 import bj.repetipro.repository.EleveRepository;
@@ -19,10 +20,12 @@ public class EleveService {
 
     private final EleveRepository repo;
     private final RepetiteurService repetiteurs;
+    private final TarifService tarifs;
 
-    public EleveService(EleveRepository repo, RepetiteurService repetiteurs) {
+    public EleveService(EleveRepository repo, RepetiteurService repetiteurs, TarifService tarifs) {
         this.repo = repo;
         this.repetiteurs = repetiteurs;
+        this.tarifs = tarifs;
     }
 
     public List<Eleve> actifs(Long repetiteurId) {
@@ -72,11 +75,21 @@ public class EleveService {
     }
 
     private void copier(EleveForm f, Eleve e) {
+        String ancienne = e.getClasse();
+        String saisie = f.getClasse() == null ? "" : f.getClasse().trim();
+        Classe officielle = Classe.de(saisie);
+        String nouvelle = officielle != null ? officielle.getLibelle() : saisie;
         e.setNom(f.getNom().trim());
-        e.setClasse(f.getClasse().trim());
+        e.setClasse(nouvelle);
         e.setMatieres(f.getMatieres());
         e.setNomParent(f.getNomParent());
         e.setWhatsappParent(Telephones.normaliser(f.getWhatsappParent()));
-        e.setTarifMensuel(f.getTarifMensuel());
+        // Le montant saisi par le client est ignoré : on prend la grille, sauf
+        // pour un élève déjà enregistré dont la classe n'a pas changé (ancien tarif conservé).
+        boolean nouveau = e.getId() == null;
+        boolean classeChangee = ancienne != null && !Classe.meme(ancienne, nouvelle);
+        if (nouveau || classeChangee) {
+            e.setTarifMensuel(tarifs.montant(e.getRepetiteur().getId(), nouvelle));
+        }
     }
 }

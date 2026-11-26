@@ -25,7 +25,7 @@
       <form th:action="@{/factures/generer(mois=${mois})}" method="post">
         <button type="submit" class="btn" th:text="${'Générer les factures ' + @fmt.deMois(mois)}">Générer les factures d'octobre 2026</button>
       </form>
-      <p class="petit">Une facture par élève actif, au montant de son tarif mensuel. À payer avant le 10 du mois suivant.</p>
+      <p class="petit">Une facture par élève actif, au tarif mensuel fixe de sa classe. À payer avant le 10 du mois suivant.</p>
     </div>
 
     <section class="carte">

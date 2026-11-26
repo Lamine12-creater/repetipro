@@ -474,3 +474,27 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--i
 .choix-reseau label + input + label { border-left: 1.5px solid var(--encre); }
 .choix-reseau input:checked + label { background: var(--encre); color: var(--feuille); }
 .choix-reseau input:focus-visible + label { outline: 2px solid var(--terre); outline-offset: -4px; }
+
+/* Montant mensuel lu sur la grille (non saisissable) */
+.montant-fixe {
+  font-family: var(--titre);
+  font-size: 1.45rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin: .35rem 0 .2rem;
+  min-height: 1.6em;
+}
+.montant-fixe.vide { color: var(--muet); font-size: 1.05rem; font-weight: 500; }
+
+.chapeau { color: var(--muet); margin: 0 0 1rem; max-width: 36rem; }
+
+.groupe-tarif { margin: 1.3rem 0 .35rem; font-size: 1.05rem; }
+.groupe-tarif:first-child { margin-top: 0; }
+.ligne-tarif {
+  display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--ligne, #ece6d8);
+}
+.ligne-tarif label { margin: 0; flex: 1; }
+.saisie-tarif { display: flex; align-items: center; gap: .5rem; }
+.saisie-tarif input { width: 8.5rem; text-align: right; }
+.saisie-tarif span { color: var(--muet); font-size: .88rem; white-space: nowrap; }

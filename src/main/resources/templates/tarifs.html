@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Tarifs')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu" id="contenu">
+    <h1>Tarifs mensuels</h1>
+    <div th:replace="~{fragments :: messages}"></div>
+    <p class="chapeau">Le montant n'est pas négocié avec les parents. Quand vous choisissez la classe d'un élève, ce tarif s'affiche tout de suite et sert à la facture du mois.</p>
+
+    <form class="carte" th:action="@{/tarifs}" method="post">
+      <th:block th:each="c, it : ${classes}">
+        <h2 class="groupe-tarif" th:if="${it.first or c.groupe != classes[it.index - 1].groupe}"
+            th:text="${c.groupe}">Collège</h2>
+        <div class="ligne-tarif">
+          <label th:for="${c.name()}" th:text="${c.libelle}">5ème</label>
+          <div class="saisie-tarif">
+            <input th:id="${c.name()}" th:name="${c.name()}" type="number" min="0" max="1000000" step="500"
+                   inputmode="numeric" required
+                   th:value="${saisie != null ? saisie[c.name()] : grille[c.libelle]}">
+            <span>FCFA / mois</span>
+          </div>
+        </div>
+      </th:block>
+      <p class="petit" style="margin-top:1rem">Les tarifs déjà en cours pour un élève ne changent que si vous modifiez sa classe. Les nouvelles fiches et les changements de classe utilisent cette grille.</p>
+      <p style="margin-top:1rem"><button type="submit" class="btn bloc">Enregistrer les tarifs</button></p>
+      <a th:href="@{/parametres}" class="btn bloc secondaire">Retour aux paramètres</a>
+    </form>
+  </main>
+  <nav th:replace="~{fragments :: navBas('')}"></nav>
+</body>
+</html>

@@ -57,6 +57,7 @@ public class PdfFactureService {
         detail.addCell(enTete("Désignation"));
         detail.addCell(enTete("Montant"));
         String libelle = "Cours à domicile — " + FactureService.libelleMois(f.getPeriode())
+                + " (tarif mensuel fixe)"
                 + (e.getMatieres() == null || e.getMatieres().isBlank() ? "" : "\nMatières : " + e.getMatieres())
                 + "\nSéances réalisées : " + f.getNombreSeances();
         detail.addCell(cellule(libelle, normal));

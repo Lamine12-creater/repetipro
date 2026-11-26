@@ -22,6 +22,12 @@
     </form>
 
     <section class="carte">
+      <h2>Tarifs mensuels</h2>
+      <p>Le montant dépend de la classe, selon votre grille. Il s'affiche automatiquement à l'ajout d'un élève.</p>
+      <a th:href="@{/tarifs}" class="btn bloc secondaire">Voir ou modifier mes tarifs</a>
+    </section>
+
+    <section class="carte">
       <h2>Mon abonnement</h2>
       <p>Formule actuelle : <strong th:text="${moi.soloActif ? 'Solo (élèves illimités)' : 'Gratuite (3 élèves max.)'}">Gratuite</strong></p>
       <p th:if="${moi.soloActif and moi.soloJusquAu != null}" class="petit">Payée jusqu'au
