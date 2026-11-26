@@ -133,7 +133,7 @@ class RepetiproIntegrationTest {
     }
 
     @Test
-    void leTarifVientDeLaGrilleEtIgnoreLeMontantClient() {
+    void leTarifVientDeLaGrilleGlobaleEtIgnoreLeMontantClient() {
         Repetiteur r = nouveauRepetiteur();
         Eleve e = eleves.creer(r.getId(), eleve("Kossi", 1));
         assertEquals("5ème", e.getClasse());
@@ -142,34 +142,40 @@ class RepetiproIntegrationTest {
         java.util.Map<String, String> grille = new java.util.HashMap<>();
         for (Classe c : Classe.values()) grille.put(c.name(), String.valueOf(c.getTarifDefaut()));
         grille.put("CINQUIEME", "27000");
-        assertNull(tarifs.enregistrer(r.getId(), grille));
+        try {
+            assertNull(tarifs.enregistrer(grille));
 
-        EleveForm f = eleve("Kossi", 1);
-        f.setClasse("5ème");
-        eleves.modifier(e.getId(), r.getId(), f);
-        assertEquals(25_000, eleves.trouver(e.getId(), r.getId()).getTarifMensuel(),
-                "même classe : l'ancien tarif est conservé");
+            EleveForm f = eleve("Kossi", 1);
+            f.setClasse("5ème");
+            eleves.modifier(e.getId(), r.getId(), f);
+            assertEquals(25_000, eleves.trouver(e.getId(), r.getId()).getTarifMensuel(),
+                    "même classe : l'ancien tarif est conservé");
 
-        f.setClasse("3ème");
-        eleves.modifier(e.getId(), r.getId(), f);
-        Eleve apres = eleves.trouver(e.getId(), r.getId());
-        assertEquals("3ème", apres.getClasse());
-        assertEquals(30_000, apres.getTarifMensuel());
+            f.setClasse("3ème");
+            eleves.modifier(e.getId(), r.getId(), f);
+            Eleve apres = eleves.trouver(e.getId(), r.getId());
+            assertEquals("3ème", apres.getClasse());
+            assertEquals(30_000, apres.getTarifMensuel());
 
-        f.setClasse("5ème");
-        eleves.modifier(e.getId(), r.getId(), f);
-        assertEquals(27_000, eleves.trouver(e.getId(), r.getId()).getTarifMensuel(),
-                "changement de classe : nouveau tarif de la grille");
+            f.setClasse("5ème");
+            eleves.modifier(e.getId(), r.getId(), f);
+            assertEquals(27_000, eleves.trouver(e.getId(), r.getId()).getTarifMensuel(),
+                    "changement de classe : nouveau tarif de la grille globale");
+            // Un autre répétiteur voit la même grille
+            Repetiteur autre = nouveauRepetiteur();
+            assertEquals(27_000, eleves.creer(autre.getId(), eleve("Awa", 1)).getTarifMensuel());
+        } finally {
+            grille.put("CINQUIEME", "25000");
+            tarifs.enregistrer(grille);
+        }
     }
 
     @Test
-    void leFormulaireEleveNAplusDeChampTarifLibreEtLaPageTarifsEstProtegee() throws Exception {
+    void leFormulaireEleveNAplusDeChampTarifLibreEtLaPageTarifsEstReserveeAuSuperAdmin() throws Exception {
         Repetiteur r = nouveauRepetiteur();
         UtilisateurConnecte moi = (UtilisateurConnecte) repetiteurs.loadUserByUsername(r.getTelephone());
         mvc.perform(get("/tarifs")).andExpect(status().is3xxRedirection());
-        mvc.perform(get("/tarifs").with(user(moi))).andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tarifs mensuels")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("25")));
+        mvc.perform(get("/tarifs").with(user(moi))).andExpect(status().isForbidden());
         mvc.perform(get("/eleves/nouveau").with(user(moi))).andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"classe\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-montant")))

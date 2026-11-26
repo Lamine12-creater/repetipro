@@ -35,6 +35,9 @@ public class Facture {
     @Column(nullable = false)
     private int montant;
 
+    /** Date de génération (vide pour les factures créées avant cette colonne). */
+    private LocalDateTime dateCreation = LocalDateTime.now();
+
     /** Nombre de séances réalisées (présent ou en retard) dans le mois. */
     private int nombreSeances;
 
@@ -98,6 +101,7 @@ public class Facture {
     public void setStatut(StatutFacture statut) { this.statut = statut; }
     public String getReferenceMomo() { return referenceMomo; }
     public void setReferenceMomo(String referenceMomo) { this.referenceMomo = referenceMomo; }
+    public LocalDateTime getDateCreation() { return dateCreation; }
     public LocalDateTime getDatePaiement() { return datePaiement; }
     public void setDatePaiement(LocalDateTime datePaiement) { this.datePaiement = datePaiement; }
 }

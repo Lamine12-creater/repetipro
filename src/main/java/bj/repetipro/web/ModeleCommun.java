@@ -16,7 +16,16 @@ public class ModeleCommun {
 
     private final RepetiteurService repetiteurs;
 
-    public ModeleCommun(RepetiteurService repetiteurs) { this.repetiteurs = repetiteurs; }
+    private final bj.repetipro.service.ParametreService parametres;
+
+    public ModeleCommun(RepetiteurService repetiteurs, bj.repetipro.service.ParametreService parametres) {
+        this.repetiteurs = repetiteurs;
+        this.parametres = parametres;
+    }
+
+    /** Prix de Solo (réglable par le SuperAdmin), pour les pages publiques et connectées. */
+    @ModelAttribute("prixSolo")
+    public int prixSolo() { return parametres.prixSolo(); }
 
     @ModelAttribute("moi")
     public Repetiteur moi(@AuthenticationPrincipal UtilisateurConnecte u) {
@@ -31,6 +40,7 @@ public class ModeleCommun {
         if (uri.startsWith("/seances")) return "seances";
         if (uri.startsWith("/factures")) return "factures";
         if (uri.startsWith("/tableau-de-bord")) return "accueil";
+        if (uri.startsWith("/admin")) return "admin";
         return "";
     }
 

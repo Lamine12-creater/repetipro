@@ -12,4 +12,6 @@ public interface EleveRepository extends JpaRepository<Eleve, Long> {
     List<Eleve> findByRepetiteurIdAndActifFalseOrderByNomAsc(Long repetiteurId);
     Optional<Eleve> findByIdAndRepetiteurId(Long id, Long repetiteurId);
     long countByRepetiteurIdAndActifTrue(Long repetiteurId);
+    List<Eleve> findTop8ByOrderByIdDesc();
+    long countByActifTrue();
 }

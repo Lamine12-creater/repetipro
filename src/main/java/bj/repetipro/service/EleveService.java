@@ -89,7 +89,7 @@ public class EleveService {
         boolean nouveau = e.getId() == null;
         boolean classeChangee = ancienne != null && !Classe.meme(ancienne, nouvelle);
         if (nouveau || classeChangee) {
-            e.setTarifMensuel(tarifs.montant(e.getRepetiteur().getId(), nouvelle));
+            e.setTarifMensuel(tarifs.montant(nouvelle));
         }
     }
 }

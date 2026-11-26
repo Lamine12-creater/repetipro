@@ -141,7 +141,7 @@ public class EleveController {
     }
 
     private void preparerFormulaire(Model model, Long repetiteurId, Eleve existant) {
-        java.util.Map<String, Integer> grille = tarifs.grille(repetiteurId);
+        java.util.Map<String, Integer> grille = tarifs.grille();
         model.addAttribute("classes", Classe.values());
         model.addAttribute("grille", grille);
         if (existant != null) {

@@ -45,8 +45,10 @@ public class RepetiteurService implements UserDetailsService {
         String tel = Telephones.normaliser(saisie);
         Repetiteur r = (tel == null ? null : repo.findByTelephone(tel).orElse(null));
         if (r == null) throw new UsernameNotFoundException("Compte introuvable");
+        boolean superAdmin = telephonesAdmin.contains(r.getTelephone());
+        // Un SuperAdmin ne peut jamais être bloqué (sinon plus personne ne pourrait réparer).
         return new UtilisateurConnecte(r.getId(), r.getTelephone(), r.getMotDePasseHash(),
-                telephonesAdmin.contains(r.getTelephone()));
+                superAdmin, superAdmin || r.isCompteActif());
     }
 
     /** Crée un compte. Lève IllegalArgumentException avec un message lisible en cas de problème. */
@@ -88,5 +90,40 @@ public class RepetiteurService implements UserDetailsService {
         r.setPlan(plan);
         // Activation/retrait manuel par l'admin : pas de date de fin (géré à la main).
         r.setSoloJusquAu(null);
+    }
+
+    /** Vrai si ce numéro (saisi ou normalisé) est celui d'un SuperAdmin. */
+    public boolean estSuperAdmin(String telephone) {
+        String tel = Telephones.normaliser(telephone);
+        return tel != null && telephonesAdmin.contains(tel);
+    }
+
+    public boolean estSuperAdmin(Repetiteur r) { return r != null && telephonesAdmin.contains(r.getTelephone()); }
+
+    /** Prolonge Solo de n mois à partir d'aujourd'hui (ou de la fin actuelle si elle est plus tard). */
+    @Transactional
+    public void prolongerSolo(Long id, int mois) {
+        Repetiteur r = trouver(id);
+        java.time.LocalDate base = r.getSoloJusquAu() != null && r.getSoloJusquAu().isAfter(java.time.LocalDate.now())
+                ? r.getSoloJusquAu() : java.time.LocalDate.now();
+        r.setPlan(Plan.SOLO);
+        r.setSoloJusquAu(base.plusMonths(mois));
+    }
+
+    /** Suspend Solo : retour à la formule gratuite. */
+    @Transactional
+    public void suspendreSolo(Long id) {
+        Repetiteur r = trouver(id);
+        r.setPlan(Plan.GRATUIT);
+        r.setSoloJusquAu(null);
+    }
+
+    /** Active ou désactive un compte (jamais celui d'un SuperAdmin). @return false si refusé */
+    @Transactional
+    public boolean changerActivation(Long id, boolean actif) {
+        Repetiteur r = trouver(id);
+        if (!actif && estSuperAdmin(r)) return false;
+        r.setCompteActif(actif);
+        return true;
     }
 }

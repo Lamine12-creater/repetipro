@@ -19,8 +19,14 @@ public class UtilisateurConnecte implements UserDetails {
     private final String telephone;
     private final String motDePasseHash;
     private final boolean admin;
+    private final boolean actif;
 
     public UtilisateurConnecte(Long id, String telephone, String motDePasseHash, boolean admin) {
+        this(id, telephone, motDePasseHash, admin, true);
+    }
+
+    public UtilisateurConnecte(Long id, String telephone, String motDePasseHash, boolean admin, boolean actif) {
+        this.actif = actif;
         this.id = id;
         this.telephone = telephone;
         this.motDePasseHash = motDePasseHash;
@@ -28,13 +34,19 @@ public class UtilisateurConnecte implements UserDetails {
     }
 
     public Long getId() { return id; }
+    /** SuperAdmin : numéro listé dans ADMIN_TELEPHONES. */
     public boolean isAdmin() { return admin; }
+    public boolean isSuperAdmin() { return admin; }
+    @Override public boolean isEnabled() { return actif; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> roles = new ArrayList<>();
         roles.add(new SimpleGrantedAuthority("ROLE_REPETITEUR"));
-        if (admin) roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        if (admin) {
+            roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            roles.add(new SimpleGrantedAuthority("ROLE_SUPERADMIN"));
+        }
         return roles;
     }
 

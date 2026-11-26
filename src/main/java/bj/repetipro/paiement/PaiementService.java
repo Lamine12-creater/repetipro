@@ -40,7 +40,6 @@ public class PaiementService {
 
     private static final Logger log = LoggerFactory.getLogger(PaiementService.class);
 
-    public static final long MONTANT_SOLO = 1500;
     public static final String DESCRIPTION_SOLO = "Abonnement RépétiPro Solo - 1 mois";
 
     private final PaiementRepository paiements;
@@ -52,12 +51,15 @@ public class PaiementService {
     private final TransactionTemplate tx;
     private final Clock horloge;
     private final EntityManager em;
+    private final bj.repetipro.service.ParametreService parametres;
     private final SecureRandom alea = new SecureRandom();
 
     public PaiementService(PaiementRepository paiements, RepetiteurRepository repetiteurs, ConfigPaiement config,
                            FedaPayClient fedapay, SimulationFournisseur simulation, ObjectMapper json,
-                           PlatformTransactionManager gestionnaire, EntityManager em) {
+                           PlatformTransactionManager gestionnaire, EntityManager em,
+                           bj.repetipro.service.ParametreService parametres) {
         this.em = em;
+        this.parametres = parametres;
         this.paiements = paiements;
         this.repetiteurs = repetiteurs;
         this.config = config;
@@ -103,7 +105,7 @@ public class PaiementService {
             nouveau.setRepetiteur(r);
             nouveau.setFournisseur(f.code());
             nouveau.setReference(nouvelleReference());
-            nouveau.setMontant(MONTANT_SOLO);
+            nouveau.setMontant(parametres.prixSolo());
             return paiements.save(nouveau);
         });
 

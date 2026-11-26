@@ -23,8 +23,7 @@
 
     <section class="carte">
       <h2>Tarifs mensuels</h2>
-      <p>Le montant dépend de la classe, selon votre grille. Il s'affiche automatiquement à l'ajout d'un élève.</p>
-      <a th:href="@{/tarifs}" class="btn bloc secondaire">Voir ou modifier mes tarifs</a>
+      <p>Le montant dépend de la classe. Il est fixé par RépétiPro, identique pour tous, et s'affiche automatiquement à l'ajout d'un élève.</p>
     </section>
 
     <section class="carte">
@@ -35,12 +34,12 @@
         <a th:href="@{/formule}">Prolonger</a></p>
       <p th:if="${moi.soloExpire}" class="petit">Votre formule Solo a pris fin le
         <span th:text="${#temporals.format(moi.soloJusquAu, 'dd/MM/yyyy')}">01/10/2026</span>.</p>
-      <a th:if="${!moi.soloActif}" th:href="@{/formule}" class="btn bloc">Passer à Solo · 1 500 FCFA/mois</a>
+      <a th:if="${!moi.soloActif}" th:href="@{/formule}" class="btn bloc" th:text="${'Passer à Solo · ' + @fmt.nombre(prixSolo) + ' FCFA/mois'}">Passer à Solo · 1 500 FCFA/mois</a>
     </section>
 
     <section class="carte">
       <p class="petit">Compte : <span th:text="${@fmt.tel(moi.telephone)}">01 …</span></p>
-      <a th:if="${estAdmin}" th:href="@{/admin}" class="btn bloc secondaire">Administration</a>
+      <a th:if="${estAdmin}" th:href="@{/admin}" class="btn bloc secondaire">Espace SuperAdmin</a>
       <form th:action="@{/deconnexion}" method="post" style="margin-top:.6rem">
         <button type="submit" class="btn bloc secondaire">Se déconnecter</button>
       </form>

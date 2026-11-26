@@ -18,9 +18,12 @@ public class AccueilController {
     private final RepetiteurService repetiteurs;
     private final bj.repetipro.paiement.ConfigPaiement configPaiement;
     private final bj.repetipro.paiement.PaiementService paiements;
+    private final bj.repetipro.service.ParametreService parametresApp;
 
     public AccueilController(RepetiteurService repetiteurs, bj.repetipro.paiement.ConfigPaiement configPaiement,
-                             bj.repetipro.paiement.PaiementService paiements) {
+                             bj.repetipro.paiement.PaiementService paiements,
+                             bj.repetipro.service.ParametreService parametresApp) {
+        this.parametresApp = parametresApp;
         this.repetiteurs = repetiteurs;
         this.configPaiement = configPaiement;
         this.paiements = paiements;
@@ -51,17 +54,15 @@ public class AccueilController {
         }
         // Connexion automatique juste après l'inscription.
         requete.login(form.getTelephone(), form.getMotDePasse());
-        return "redirect:/tableau-de-bord?bienvenue";
+        return repetiteurs.estSuperAdmin(form.getTelephone()) ? "redirect:/admin" : "redirect:/tableau-de-bord?bienvenue";
     }
 
     /** Formule Solo : paiement en ligne (FedaPay / simulation) et, toujours, le transfert manuel. */
     @GetMapping("/formule")
     public String formule(Model model,
-                          @org.springframework.security.core.annotation.AuthenticationPrincipal bj.repetipro.service.UtilisateurConnecte moi,
-                          @org.springframework.beans.factory.annotation.Value("${repetipro.paiement.momo-numero}") String numero,
-                          @org.springframework.beans.factory.annotation.Value("${repetipro.paiement.momo-nom}") String nom) {
-        model.addAttribute("momoNumero", numero);
-        model.addAttribute("momoNom", nom);
+                          @org.springframework.security.core.annotation.AuthenticationPrincipal bj.repetipro.service.UtilisateurConnecte moi) {
+        model.addAttribute("momoNumero", parametresApp.momoNumero());
+        model.addAttribute("momoNom", parametresApp.momoNom());
         model.addAttribute("limite", bj.repetipro.service.EleveService.LIMITE_GRATUITE);
         model.addAttribute("paiementEnLigne", configPaiement.paiementEnLigneDisponible());
         model.addAttribute("modeSimulation", configPaiement.simulationActive());

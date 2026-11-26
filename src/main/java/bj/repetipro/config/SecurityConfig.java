@@ -26,8 +26,8 @@ public class SecurityConfig {
                 // Webhook FedaPay : appelé par les serveurs FedaPay (sans session) ; protégé par
                 // la signature X-FEDAPAY-SIGNATURE vérifiée dans PaiementService.
                 .requestMatchers("/paiement/webhook/**").permitAll()
-                // Espace admin : seulement les numéros admin
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                // Espace SuperAdmin (numéros de ADMIN_TELEPHONES) : tableau de bord, comptes, tarifs, réglages
+                .requestMatchers("/admin", "/admin/**", "/tarifs", "/tarifs/**").hasRole("SUPERADMIN")
                 // Tout le reste : il faut être connecté
                 .anyRequest().authenticated())
             .formLogin(form -> form
@@ -35,7 +35,10 @@ public class SecurityConfig {
                 .loginProcessingUrl("/connexion")     // le formulaire envoie en POST ici
                 .usernameParameter("telephone")
                 .passwordParameter("motDePasse")
-                .defaultSuccessUrl("/tableau-de-bord", true)
+                // Le SuperAdmin arrive sur son tableau de bord /admin, les répétiteurs sur le leur.
+                .successHandler((req, res, auth) -> res.sendRedirect(req.getContextPath()
+                        + (auth.getAuthorities().stream().anyMatch(g -> g.getAuthority().equals("ROLE_SUPERADMIN"))
+                           ? "/admin" : "/tableau-de-bord")))
                 .failureUrl("/connexion?erreur")
                 .permitAll())
             .logout(logout -> logout

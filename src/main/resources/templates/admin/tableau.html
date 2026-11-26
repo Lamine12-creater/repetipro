@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('SuperAdmin')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu" id="contenu">
+    <h1>Espace SuperAdmin</h1>
+    <nav th:replace="~{fragments :: adminOnglets('tableau')}"></nav>
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <!-- Tout ce bloc est rechargé toutes les 60 secondes -->
+    <div id="tableau">
+      <p class="petit direct"><span class="point-direct" aria-hidden="true"></span>
+        En direct · mis à jour à <strong th:text="${#temporals.format(maintenant, 'HH:mm:ss')}">10:00:00</strong>
+        (heure de Porto-Novo), actualisation toutes les 60 secondes.</p>
+
+      <div class="stats stats-admin">
+        <div class="stat"><strong th:text="${stats.repetiteurs}">0</strong><span>répétiteurs inscrits</span></div>
+        <div class="stat"><strong th:text="${stats.repetiteursSolo}">0</strong><span>abonnés Solo</span></div>
+        <div class="stat"><strong th:text="${stats.eleves}">0</strong><span>élèves actifs</span></div>
+        <div class="stat"><strong th:text="${stats.seances}">0</strong><span>séances planifiées</span></div>
+        <div class="stat"><strong th:text="${stats.factures}">0</strong><span>factures émises</span></div>
+        <div class="stat"><strong th:text="${stats.facturesPayees}">0</strong><span>factures payées</span></div>
+        <div class="stat"><strong th:text="${stats.paiementsPayes}">0</strong><span>paiements Solo reçus</span></div>
+        <div class="stat fort"><strong th:text="${@fmt.nombre(stats.revenuSolo)}">0</strong><span>FCFA de revenu Solo</span></div>
+      </div>
+
+      <section class="carte">
+        <div class="carte-titre"><h2>Activité récente</h2></div>
+        <ul class="liste fil" th:unless="${activites.isEmpty()}">
+          <li th:each="a : ${activites}">
+            <span class="type-activite" th:classappend="${a.type}" th:text="${a.libelle}">Inscription</span>
+            <div class="infos">
+              <strong th:text="${a.texte}">Nom</strong>
+              <p class="petit" th:text="${#temporals.format(a.date, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</p>
+            </div>
+          </li>
+        </ul>
+        <p class="vide" th:if="${activites.isEmpty()}">Aucune activité pour le moment.</p>
+      </section>
+    </div>
+  </main>
+  <nav th:replace="~{fragments :: navBas('admin')}"></nav>
+  <script>
+    // Actualise le bloc "En direct" toutes les 60 s, sans recharger toute la page.
+    setInterval(function () {
+      fetch(location.pathname, { credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } })
+        .then(function (r) { return r.ok ? r.text() : ''; })
+        .then(function (html) {
+          var nouveau = new DOMParser().parseFromString(html, 'text/html').getElementById('tableau');
+          if (nouveau) document.getElementById('tableau').innerHTML = nouveau.innerHTML;
+        })
+        .catch(function () { /* réseau coupé : on réessaie à la prochaine minute */ });
+    }, 60000);
+  </script>
+</body>
+</html>

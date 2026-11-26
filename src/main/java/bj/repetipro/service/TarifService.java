@@ -1,63 +1,63 @@
 package bj.repetipro.service;
 
 import bj.repetipro.model.Classe;
-import bj.repetipro.model.Repetiteur;
-import bj.repetipro.repository.RepetiteurRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Grille de tarifs mensuels (FCFA) propre à chaque répétiteur. */
+/**
+ * Grille de tarifs mensuels (FCFA) UNIQUE pour toute l'application.
+ * Seul le SuperAdmin la modifie ; les répétiteurs la lisent.
+ */
 @Service
 public class TarifService {
 
     public static final int MONTANT_MIN = 0;
     public static final int MONTANT_MAX = 1_000_000;
+    private static final String PREFIXE = "tarif.";
 
-    private final RepetiteurRepository repo;
+    private final ParametreService parametres;
 
-    public TarifService(RepetiteurRepository repo) {
-        this.repo = repo;
+    public TarifService(ParametreService parametres) {
+        this.parametres = parametres;
     }
 
-    /** Grille complète : tarif personnalisé s'il existe, sinon le tarif par défaut. */
-    @Transactional(readOnly = true)
-    public Map<String, Integer> grille(Long repetiteurId) {
-        return grilleDe(trouver(repetiteurId));
-    }
-
-    public Map<String, Integer> grilleDe(Repetiteur r) {
-        Map<String, Integer> perso = r.getTarifs();
+    /** Grille complète : tarif enregistré s'il existe, sinon le tarif par défaut. */
+    public Map<String, Integer> grille() {
         Map<String, Integer> g = new LinkedHashMap<>();
         for (Classe c : Classe.values()) {
-            Integer v = perso == null ? null : perso.get(c.getLibelle());
-            g.put(c.getLibelle(), v != null ? v : c.getTarifDefaut());
+            g.put(c.getLibelle(), montantDe(c));
         }
         return g;
     }
 
+    private int montantDe(Classe c) {
+        String v = parametres.valeur(PREFIXE + c.name());
+        if (v != null) {
+            try { return Integer.parseInt(v.trim()); } catch (NumberFormatException ignore) { /* défaut */ }
+        }
+        return c.getTarifDefaut();
+    }
+
     /** Montant à appliquer pour une classe. Lève si la classe n'est pas reconnue. */
-    @Transactional(readOnly = true)
-    public int montant(Long repetiteurId, String classeSaisie) {
+    public int montant(String classeSaisie) {
         Classe c = Classe.de(classeSaisie);
         if (c == null) throw new IllegalArgumentException("Classe inconnue.");
-        return grille(repetiteurId).get(c.getLibelle());
+        return montantDe(c);
     }
 
     /**
-     * Enregistre la grille (une valeur par classe officielle).
+     * Enregistre la grille (une valeur par classe officielle, champs nommés comme l'enum).
      * @return un message d'erreur lisible, ou null si tout va bien
      */
     @Transactional
-    public String enregistrer(Long repetiteurId, Map<String, String> saisie) {
-        Map<String, Integer> nouvelle = new LinkedHashMap<>();
+    public String enregistrer(Map<String, String> saisie) {
+        Map<Classe, Integer> nouvelle = new LinkedHashMap<>();
         for (Classe c : Classe.values()) {
             String brut = saisie.get(c.name());
-            if (brut == null || brut.isBlank()) {
-                return "Indiquez un montant pour chaque classe.";
-            }
+            if (brut == null || brut.isBlank()) return "Indiquez un montant pour chaque classe.";
             int montant;
             try {
                 montant = Integer.parseInt(brut.trim().replace(" ", "").replace("\u00a0", ""));
@@ -67,15 +67,9 @@ public class TarifService {
             if (montant < MONTANT_MIN || montant > MONTANT_MAX) {
                 return "Le tarif de " + c.getLibelle() + " doit être compris entre 0 et 1 000 000 FCFA.";
             }
-            nouvelle.put(c.getLibelle(), montant);
+            nouvelle.put(c, montant);
         }
-        Repetiteur r = trouver(repetiteurId);
-        r.getTarifs().clear();
-        r.getTarifs().putAll(nouvelle);
+        nouvelle.forEach((c, m) -> parametres.enregistrer(PREFIXE + c.name(), String.valueOf(m)));
         return null;
-    }
-
-    private Repetiteur trouver(Long id) {
-        return repo.findById(id).orElseThrow(() -> new RessourceIntrouvableException("Compte introuvable"));
     }
 }

@@ -36,6 +36,9 @@ public class Eleve {
     @Column(nullable = false)
     private int tarifMensuel;
 
+    /** Date d'ajout (vide pour les élèves créés avant cette colonne). */
+    private java.time.LocalDateTime dateCreation = java.time.LocalDateTime.now();
+
     /** Un élève archivé ne compte plus dans la limite gratuite et n'est plus facturé. */
     @Column(nullable = false)
     private boolean actif = true;
@@ -56,6 +59,7 @@ public class Eleve {
     public void setWhatsappParent(String whatsappParent) { this.whatsappParent = whatsappParent; }
     public int getTarifMensuel() { return tarifMensuel; }
     public void setTarifMensuel(int tarifMensuel) { this.tarifMensuel = tarifMensuel; }
+    public java.time.LocalDateTime getDateCreation() { return dateCreation; }
     public boolean isActif() { return actif; }
     public void setActif(boolean actif) { this.actif = actif; }
 

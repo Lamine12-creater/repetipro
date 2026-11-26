@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Comptes (SuperAdmin)')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu" id="contenu">
+    <h1>Espace SuperAdmin</h1>
+    <nav th:replace="~{fragments :: adminOnglets('comptes')}"></nav>
+    <div th:replace="~{fragments :: messages}"></div>
+    <p class="petit">Les paiements en ligne (FedaPay) activent Solo tout seuls pour un mois. Après un transfert
+      Mobile Money manuel, utilisez « +1 mois » ou « Solo sans fin » sur le compte concerné.
+      Un compte désactivé ne peut plus se connecter.</p>
+    <section class="carte">
+      <ul class="liste comptes">
+        <li th:each="c : ${comptes}" th:classappend="${!c.compteActif} ? 'desactive'">
+          <span class="initiales" th:text="${c.initiales}">AB</span>
+          <div class="infos">
+            <strong><span th:text="${c.nomComplet}">Nom</span>
+              <span class="badge paye" th:if="${repetiteursService.estSuperAdmin(c)}">SuperAdmin</span>
+              <span class="badge retard" th:unless="${c.compteActif}">Désactivé</span>
+              <span class="badge attente" th:if="${c.plan.name() == 'SOLO'}">Solo</span></strong>
+            <p class="petit" th:text="${@fmt.tel(c.telephone) + ' · inscrit le ' + #temporals.format(c.dateInscription, 'dd/MM/yyyy')
+                 + (c.soloJusquAu != null ? ' · Solo jusqu''au ' + #temporals.format(c.soloJusquAu, 'dd/MM/yyyy') : (c.plan.name() == 'SOLO' ? ' · Solo sans date de fin' : ''))}">01…</p>
+          </div>
+          <div class="actions-compte">
+            <form th:action="@{/admin/comptes/{id}/prolonger(id=${c.id}, mois=1)}" method="post">
+              <button type="submit" class="btn petit-btn">+1 mois Solo</button>
+            </form>
+            <form th:if="${c.plan.name() == 'SOLO'}" th:action="@{/admin/comptes/{id}/plan(id=${c.id}, plan='GRATUIT')}" method="post">
+              <button type="submit" class="btn petit-btn secondaire">Suspendre Solo</button>
+            </form>
+            <form th:unless="${c.plan.name() == 'SOLO'}" th:action="@{/admin/comptes/{id}/plan(id=${c.id}, plan='SOLO')}" method="post">
+              <button type="submit" class="btn petit-btn secondaire">Solo sans fin</button>
+            </form>
+            <form th:unless="${repetiteursService.estSuperAdmin(c)}"
+                  th:action="@{/admin/comptes/{id}/activation(id=${c.id}, actif=${!c.compteActif})}" method="post"
+                  th:onsubmit="${c.compteActif} ? 'return confirm(\'Désactiver ce compte ? Le répétiteur ne pourra plus se connecter.\')' : null">
+              <button type="submit" class="btn petit-btn secondaire" th:text="${c.compteActif ? 'Désactiver le compte' : 'Réactiver le compte'}">Désactiver</button>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </main>
+  <nav th:replace="~{fragments :: navBas('admin')}"></nav>
+</body>
+</html>

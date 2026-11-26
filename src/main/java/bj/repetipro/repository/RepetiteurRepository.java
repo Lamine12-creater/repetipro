@@ -1,5 +1,6 @@
 package bj.repetipro.repository;
 
+import bj.repetipro.model.Plan;
 import bj.repetipro.model.Repetiteur;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,4 +12,6 @@ public interface RepetiteurRepository extends JpaRepository<Repetiteur, Long> {
     Optional<Repetiteur> findByTelephone(String telephone);
     boolean existsByTelephone(String telephone);
     List<Repetiteur> findAllByOrderByDateInscriptionDesc();
+    List<Repetiteur> findTop8ByOrderByDateInscriptionDesc();
+    long countByPlan(Plan plan);
 }

@@ -37,6 +37,7 @@
       <li><a th:href="@{/eleves}" th:classappend="${rubrique == 'eleves'} ? 'actif'">Élèves</a></li>
       <li><a th:href="@{/seances}" th:classappend="${rubrique == 'seances'} ? 'actif'">Séances</a></li>
       <li><a th:href="@{/factures}" th:classappend="${rubrique == 'factures'} ? 'actif'">Factures</a></li>
+      <li th:if="${estAdmin}"><a th:href="@{/admin}" th:classappend="${rubrique == 'admin'} ? 'actif'">Admin</a></li>
     </ul>
   </nav>
   <a th:href="@{/parametres}" class="avatar" title="Paramètres"
@@ -59,6 +60,16 @@
     <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M8.5 15l2.5 2.5 4.5-4.5"/></svg></span>Séances</a>
   <a th:href="@{/factures}" th:classappend="${actif == 'factures'} ? 'actif'">
     <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></span>Factures</a>
+  <a th:if="${estAdmin}" th:href="@{/admin}" th:classappend="${actif == 'admin' or rubrique == 'admin'} ? 'actif'">
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.2 8 8 9 4.8-1 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>Admin</a>
+</nav>
+
+<!-- Onglets de l'espace SuperAdmin -->
+<nav th:fragment="adminOnglets(actif)" class="onglets" aria-label="Espace SuperAdmin">
+  <a th:href="@{/admin}" th:classappend="${actif == 'tableau'} ? 'actif'">Tableau de bord</a>
+  <a th:href="@{/admin/comptes}" th:classappend="${actif == 'comptes'} ? 'actif'">Comptes</a>
+  <a th:href="@{/admin/tarifs}" th:classappend="${actif == 'tarifs'} ? 'actif'">Tarifs</a>
+  <a th:href="@{/admin/parametres}" th:classappend="${actif == 'parametres'} ? 'actif'">Réglages</a>
 </nav>
 
 </body>

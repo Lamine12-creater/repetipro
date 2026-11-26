@@ -34,7 +34,7 @@
           <label>Montant mensuel</label>
           <p id="montant-affiche" class="montant-fixe vide"
              th:attr="data-tarif-actuel=${tarifActuel}">—</p>
-          <p id="montant-note" class="petit">Fixé par votre <a href="/tarifs">grille de tarifs</a>. Ce n'est pas négocié avec les parents.</p>
+          <p id="montant-note" class="petit">Fixé par la grille de tarifs RépétiPro. Ce n'est pas négocié avec les parents.</p>
         </div>
       </div>
 
@@ -76,13 +76,13 @@
         aff.classList.remove('vide');
         var montant = parseInt(m, 10);
         var meme = depart && sel.value === depart;
-        var defaut = 'Fixé par votre grille de tarifs. Ce n\'est pas négocié avec les parents.';
+        var defaut = 'Fixé par la grille de tarifs RépétiPro. Ce n\'est pas négocié avec les parents.';
         if (meme && actuel && actuel !== montant) {
           aff.textContent = fmt(actuel);
           if (note) note.innerHTML = 'Ancien tarif conservé. Il passera à ' + fmt(montant) + ' si vous changez de classe.';
         } else {
           aff.textContent = fmt(montant);
-          if (note) note.innerHTML = defaut + ' <a href="/tarifs">Modifier les tarifs</a>.';
+          if (note) note.textContent = defaut;
         }
       }
       sel.addEventListener('change', maj);

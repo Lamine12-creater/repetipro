@@ -10,6 +10,7 @@
     <p class="petit">Avec le numéro de téléphone utilisé à l'inscription.</p>
 
     <div th:if="${param.erreur}" class="alerte erreur">Numéro ou mot de passe incorrect.</div>
+    <div th:if="${param.suspendu}" class="alerte erreur">Ce compte est désactivé. Contactez RépétiPro.</div>
     <div th:if="${param.deconnecte}" class="alerte succes">Vous êtes déconnecté. À bientôt !</div>
 
     <div class="carte">

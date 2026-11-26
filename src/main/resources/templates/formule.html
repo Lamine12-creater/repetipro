@@ -14,7 +14,7 @@
     <div>
     <section class="carte tarif vedette">
       <h1>Formule Solo</h1>
-      <div class="prix">1 500 FCFA <small>/ mois</small></div>
+      <div class="prix"><span th:text="${@fmt.nombre(prixSolo)} + ' FCFA'">1 500 FCFA</span> <small>/ mois</small></div>
       <ul><li>Élèves illimités</li><li>Comptes rendus et rappels WhatsApp</li><li>Factures PDF</li></ul>
       <th:block th:if="${moi != null}">
         <p th:if="${moi.soloActif and moi.soloJusquAu != null}" class="etat-abonnement actif">
@@ -36,7 +36,7 @@
       </p>
       <form th:if="${moi != null}" th:action="@{/paiement/solo}" method="post">
         <button type="submit" class="btn bloc" id="payer-solo"
-                th:text="${moi.soloActif and moi.soloJusquAu != null ? 'Prolonger d''un mois : payer 1 500 FCFA' : 'Payer 1 500 FCFA par Mobile Money'}">Payer 1 500 FCFA par Mobile Money</button>
+                th:text="${moi.soloActif and moi.soloJusquAu != null ? 'Prolonger d''un mois : payer ' + @fmt.nombre(prixSolo) + ' FCFA' : 'Payer ' + @fmt.nombre(prixSolo) + ' FCFA par Mobile Money'}">Payer 1 500 FCFA par Mobile Money</button>
       </form>
       <a th:if="${moi == null}" th:href="@{/connexion}" class="btn bloc">Se connecter pour payer</a>
       <p class="petit" style="margin-top:.6rem">Paiement sécurisé par FedaPay. Un mois payé s'ajoute à la fin de votre mois en cours.</p>
@@ -67,7 +67,7 @@
         Nom affiché : <span th:text="${momoNom}">REPETIPRO</span>
       </div>
       <ol style="padding-left:1.2rem">
-        <li>Envoyez <strong>1 500 FCFA</strong> (ou 4 500 FCFA pour 3 mois) par MTN MoMo, Moov Money ou Celtiis Cash.</li>
+        <li>Envoyez <strong th:text="${@fmt.nombre(prixSolo)} + ' FCFA'">1 500 FCFA</strong> (ou <span th:text="${@fmt.nombre(prixSolo * 3)} + ' FCFA'">4 500 FCFA</span> pour 3 mois) par MTN MoMo, Moov Money ou Celtiis Cash.</li>
         <li>En motif, indiquez : <strong>Solo + votre numéro de compte</strong>
           <span th:if="${moi != null}">(<span th:text="${@fmt.tel(moi.telephone)}"></span>)</span>.</li>
         <li>Votre compte passe en Solo dès réception (activation manuelle, en général le jour même).</li>

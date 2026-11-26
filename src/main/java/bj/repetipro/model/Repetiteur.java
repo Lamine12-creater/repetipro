@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Un répétiteur = un compte utilisateur. Toutes les autres données
@@ -50,14 +48,10 @@ public class Repetiteur {
     private LocalDate soloJusquAu;
 
     /**
-     * Grille personnalisée (libellé de classe → montant FCFA).
-     * Vide = on utilise les tarifs par défaut (voir {@link Classe}).
+     * Compte actif ? Colonne facultative (null = actif) pour ne rien casser sur les comptes existants.
+     * Un compte désactivé par le SuperAdmin ne peut plus se connecter.
      */
-    @ElementCollection
-    @CollectionTable(name = "tarif_classe", joinColumns = @JoinColumn(name = "repetiteur_id"))
-    @MapKeyColumn(name = "classe", length = 20)
-    @Column(name = "montant", nullable = false)
-    private Map<String, Integer> tarifs = new HashMap<>();
+    private Boolean compteActif;
 
     // --- Getters / setters (générés classiquement) ---
     public Long getId() { return id; }
@@ -78,11 +72,8 @@ public class Repetiteur {
     public void setDateInscription(LocalDateTime dateInscription) { this.dateInscription = dateInscription; }
     public LocalDate getSoloJusquAu() { return soloJusquAu; }
     public void setSoloJusquAu(LocalDate soloJusquAu) { this.soloJusquAu = soloJusquAu; }
-    public Map<String, Integer> getTarifs() {
-        if (tarifs == null) tarifs = new HashMap<>();
-        return tarifs;
-    }
-    public void setTarifs(Map<String, Integer> tarifs) { this.tarifs = tarifs; }
+    public boolean isCompteActif() { return compteActif == null || compteActif; }
+    public void setCompteActif(boolean actif) { this.compteActif = actif; }
 
     /**
      * Vrai si le compte profite de Solo aujourd'hui : formule SOLO et, si elle a été payée
