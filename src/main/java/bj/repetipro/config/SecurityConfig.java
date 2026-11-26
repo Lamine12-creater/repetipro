@@ -21,15 +21,17 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.ignoringRequestMatchers("/paiement/webhook/**"))
             .authorizeHttpRequests(regles -> regles
                 // Pages accessibles sans compte
-                .requestMatchers("/", "/connexion", "/inscription", "/formule",
+                .requestMatchers("/", "/connexion", "/inscription", "/inscription/**", "/formule",
                                  "/css/**", "/favicon.svg", "/favicon.ico", "/error").permitAll()
                 // Webhook FedaPay : appelé par les serveurs FedaPay (sans session) ; protégé par
                 // la signature X-FEDAPAY-SIGNATURE vérifiée dans PaiementService.
                 .requestMatchers("/paiement/webhook/**").permitAll()
                 // Espace SuperAdmin (numéros de ADMIN_TELEPHONES) : tableau de bord, comptes, tarifs, réglages
                 .requestMatchers("/admin", "/admin/**", "/tarifs", "/tarifs/**").hasRole("SUPERADMIN")
-                // Tout le reste : il faut être connecté
-                .anyRequest().authenticated())
+                // Espace parent : réservé aux comptes parents
+                .requestMatchers("/parent", "/parent/**").hasRole("PARENT")
+                // Tout le reste (espace répétiteur) : il faut être connecté en répétiteur ; un parent n'y entre pas
+                .anyRequest().hasRole("REPETITEUR"))
             .formLogin(form -> form
                 .loginPage("/connexion")              // notre page HTML
                 .loginProcessingUrl("/connexion")     // le formulaire envoie en POST ici
@@ -38,7 +40,9 @@ public class SecurityConfig {
                 // Le SuperAdmin arrive sur son tableau de bord /admin, les répétiteurs sur le leur.
                 .successHandler((req, res, auth) -> res.sendRedirect(req.getContextPath()
                         + (auth.getAuthorities().stream().anyMatch(g -> g.getAuthority().equals("ROLE_SUPERADMIN"))
-                           ? "/admin" : "/tableau-de-bord")))
+                           ? "/admin"
+                           : auth.getAuthorities().stream().anyMatch(g -> g.getAuthority().equals("ROLE_PARENT"))
+                             ? "/parent" : "/tableau-de-bord")))
                 .failureUrl("/connexion?erreur")
                 .permitAll())
             .logout(logout -> logout

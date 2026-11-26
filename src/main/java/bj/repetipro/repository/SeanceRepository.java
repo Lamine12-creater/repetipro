@@ -22,4 +22,9 @@ public interface SeanceRepository extends JpaRepository<Seance, Long> {
 
     /** Dernières séances d'un élève (historique). */
     List<Seance> findTop10ByEleveIdOrderByDebutDesc(Long eleveId);
+    boolean existsByEleveIdAndDebut(Long eleveId, LocalDateTime debut);
+    List<Seance> findByEleveIdAndDebutGreaterThanEqualOrderByDebutAsc(Long eleveId, LocalDateTime depuis);
+    List<Seance> findByEleveIdAndDebutAfterAndAutomatiqueTrueAndPresence(Long eleveId, LocalDateTime apres, Presence presence);
+    List<Seance> findTop8ByPointeLeNotNullOrderByPointeLeDesc();
+    long countByPointeLeNotNull();
 }

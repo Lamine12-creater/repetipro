@@ -23,8 +23,10 @@ public class SeanceController {
 
     private final SeanceService seances;
     private final EleveService eleves;
+    private final bj.repetipro.service.PlanningService planning;
 
-    public SeanceController(SeanceService seances, EleveService eleves) {
+    public SeanceController(SeanceService seances, EleveService eleves, bj.repetipro.service.PlanningService planning) {
+        this.planning = planning;
         this.seances = seances;
         this.eleves = eleves;
     }
@@ -47,7 +49,8 @@ public class SeanceController {
             preparerListe(moi, model, form);
             return "seances/liste";
         }
-        seances.planifier(moi.getId(), form.getEleveId(), form.getDate().atTime(form.getHeure()), form.getDureeMinutes());
+        // La durée est fixée par la classe : celle du formulaire est ignorée.
+        seances.planifierSelonRegle(moi.getId(), form.getEleveId(), form.getDate().atTime(form.getHeure()));
         flash.addFlashAttribute("message", "Séance planifiée.");
         return "redirect:/seances";
     }
@@ -85,6 +88,23 @@ public class SeanceController {
         return "redirect:/seances/" + id;
     }
 
+    /** Pointage en un clic (présent / absent / en retard), depuis le tableau de bord, le planning ou la fiche élève. */
+    @PostMapping("/{id}/pointage")
+    public String pointageRapide(@AuthenticationPrincipal UtilisateurConnecte moi, @PathVariable Long id,
+                                 @RequestParam Presence presence,
+                                 @RequestParam(defaultValue = "/seances") String retour,
+                                 RedirectAttributes flash) {
+        try {
+            seances.pointerRapide(id, moi.getId(), presence);
+            flash.addFlashAttribute("message", "Séance pointée : " + presence.getLibelle().toLowerCase() + ".");
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            flash.addFlashAttribute("erreur", ex.getMessage());
+        }
+        boolean sur = retour.startsWith("/") && !retour.startsWith("//") && !retour.contains("://")
+                && (retour.startsWith("/tableau-de-bord") || retour.startsWith("/seances") || retour.startsWith("/eleves/"));
+        return "redirect:" + (sur ? retour : "/seances");
+    }
+
     @PostMapping("/{id}/supprimer")
     public String supprimer(@AuthenticationPrincipal UtilisateurConnecte moi, @PathVariable Long id, RedirectAttributes flash) {
         seances.supprimer(id, moi.getId());
@@ -94,6 +114,8 @@ public class SeanceController {
 
     private void preparerListe(UtilisateurConnecte moi, Model model, SeanceForm form) {
         LocalDate aujourdhui = LocalDate.now();
+        planning.genererPourRepetiteur(moi.getId()); // séances de la semaine d'après les créneaux des parents
+        model.addAttribute("sansCreneaux", planning.sansCreneaux(moi.getId()));
         model.addAttribute("form", form);
         model.addAttribute("eleves", eleves.actifs(moi.getId()));
         model.addAttribute("aVenir", seances.aVenir(moi.getId(), aujourdhui));

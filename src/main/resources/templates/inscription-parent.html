@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Compte parent')}"></head>
+<body>
+  <header class="entete-site">
+    <a th:replace="~{fragments :: logo(@{/})}"></a>
+  </header>
+  <main class="page-connexion" id="contenu">
+    <span class="type-badge parent">Compte parent</span>
+    <h1>Créer mon compte parent</h1>
+    <p class="petit">Gratuit. Vous choisissez les jours et heures des séances de votre enfant et vous suivez les présences et les factures.</p>
+
+    <div class="carte">
+      <form th:action="@{/inscription/parent}" th:object="${form}" method="post">
+        <label for="nom">Votre nom et prénom (parent)</label>
+        <input id="nom" th:field="*{nomComplet}" placeholder="Ex. Mme Adjovi" required>
+        <p class="erreur-champ" th:if="${#fields.hasErrors('nomComplet')}" th:errors="*{nomComplet}"></p>
+
+        <label for="tel">Votre numéro de téléphone</label>
+        <input id="tel" th:field="*{telephone}" type="tel" placeholder="01 97 00 00 00" inputmode="tel" required>
+        <p class="petit">Le numéro que le répétiteur a enregistré pour vous : c'est lui qui relie votre compte à votre enfant.</p>
+        <p class="erreur-champ" th:if="${#fields.hasErrors('telephone')}" th:errors="*{telephone}"></p>
+
+        <label for="mdp">Mot de passe (6 caractères minimum)</label>
+        <input id="mdp" th:field="*{motDePasse}" type="password" required autocomplete="new-password">
+        <p class="erreur-champ" th:if="${#fields.hasErrors('motDePasse')}" th:errors="*{motDePasse}"></p>
+
+        <label for="conf">Retapez le mot de passe</label>
+        <input id="conf" th:field="*{confirmation}" type="password" required autocomplete="new-password">
+        <p class="erreur-champ" th:if="${#fields.hasErrors('confirmation')}" th:errors="*{confirmation}"></p>
+
+        <p style="margin-top:1rem"><button type="submit" class="btn bloc">Créer mon compte parent</button></p>
+      </form>
+    </div>
+    <p class="apres">Vous êtes répétiteur ? <a th:href="@{/inscription/repetiteur}">Créer un compte répétiteur</a><br>
+      Déjà inscrit ? <a th:href="@{/connexion}">Se connecter</a></p>
+  </main>
+</body>
+</html>

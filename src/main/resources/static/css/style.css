@@ -521,10 +521,10 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--i
 .actions-compte { display: flex; flex-wrap: wrap; gap: .4rem; width: 100%; }
 .actions-compte form { margin: 0; }
 @media (min-width: 700px) {
-  .stats-admin { grid-template-columns: repeat(4, 1fr); }
+  .stats-admin { grid-template-columns: repeat(5, 1fr); }
   .stats-admin .stat { border-left: 1px solid var(--bord) !important; border-top: 0 !important; }
-  .stats-admin .stat:nth-child(4n+1) { border-left: 0 !important; }
-  .stats-admin .stat:nth-child(n+5) { border-top: 1px solid var(--bord) !important; }
+  .stats-admin .stat:nth-child(5n+1) { border-left: 0 !important; }
+  .stats-admin .stat:nth-child(n+6) { border-top: 1px solid var(--bord) !important; }
   .actions-compte { width: auto; }
   .liste.comptes li { flex-wrap: nowrap; }
 }
@@ -532,3 +532,58 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--i
   .onglets { gap: 0; }
   .onglets a { padding: .55rem .6rem; font-size: .84rem; }
 }
+
+/* 21. Parents, créneaux, pointage rapide */
+.type-compte { border: 1.5px solid var(--bord); border-radius: var(--rayon); padding: .5rem .8rem .7rem; margin: 0 0 .9rem; }
+.type-compte legend { font-size: .85rem; color: var(--muet); padding: 0 .3rem; }
+.type-compte .choix { display: inline-flex; align-items: center; gap: .4rem; margin: .3rem 1.2rem 0 0; font-weight: 700; }
+.type-compte input { width: auto; margin: 0; }
+.deconnexion-parent { display: flex; align-items: center; gap: .7rem; margin: 0; }
+.deconnexion-parent .petit-nom { font-size: .85rem; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: none; }
+.btn.secondaire.claire { color: var(--craie); border-color: rgba(242, 238, 227, .6); background: transparent; }
+.infos-fixes .montant-fixe { margin: .1rem 0 .4rem; font-size: 1.15rem; }
+.infos-fixes .montant-fixe.regle { font-size: 1rem; font-weight: 600; }
+.creneau-ligne { padding: .7rem 0; border-bottom: 1px solid var(--bord); }
+.creneau-ligne:last-of-type { border-bottom: 0; }
+.creneau-ligne > strong { font-family: var(--titre); }
+.creneau-ligne .fin-seance { margin: .35rem 0 0; font-weight: 700; color: var(--terre); }
+.pointage-rapide { display: flex; gap: .35rem; margin: 0; flex-shrink: 0; }
+.pointage-rapide .btn { white-space: nowrap; }
+.lien-nom { color: inherit; }
+.type-activite.creneaux { background: var(--indigo-clair); color: var(--indigo); }
+.type-activite.pointage { background: var(--vert-clair); color: var(--vert); }
+.ligne-regle { flex-wrap: wrap; }
+.saisie-regle { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem .5rem; width: 100%; padding-bottom: .2rem; }
+.saisie-regle input { width: 4.2rem; text-align: right; }
+.saisie-regle label.mini { margin: 0; font-size: .8rem; color: var(--muet); font-weight: 400; }
+@media (min-width: 700px) { .deconnexion-parent .petit-nom { display: inline; } }
+@media (max-width: 520px) {
+  .liste li.seance-ligne, .liste li { flex-wrap: wrap; }
+  .pointage-rapide { width: 100%; }
+  .pointage-rapide .btn { flex: 1; }
+}
+
+/* 22. Deux types de compte : répétiteur / parent */
+.type-badge { display: inline-block; font-size: .74rem; font-weight: 700; letter-spacing: .02em; padding: .2rem .55rem; border-radius: 3px; text-transform: uppercase; }
+.type-badge.repetiteur { background: var(--indigo-clair); color: var(--indigo); }
+.type-badge.parent { background: var(--vert-clair); color: var(--vert); }
+.type-badge.admin { background: var(--orange-clair); color: #8a5a00; }
+.type-badge.sur-barre { margin-left: auto; margin-right: .2rem; background: rgba(242, 238, 227, .14); color: var(--craie); border: 1px solid rgba(242, 238, 227, .35); }
+.barre .logo + .type-badge.sur-barre { margin-left: auto; }
+.barre nav + .type-badge.sur-barre { margin-left: 0; }
+.page-connexion > .type-badge { margin-bottom: .6rem; }
+.choix-compte { display: flex; flex-direction: column; gap: .4rem; text-decoration: none; color: var(--encre); background: var(--feuille);
+  border: 1.5px solid var(--bord); border-radius: var(--rayon); padding: 1rem; margin: 0 0 1rem; }
+.choix-compte:hover { color: var(--encre); border-color: var(--terre); }
+.choix-compte.repetiteur { border-left: 6px solid var(--indigo); }
+.choix-compte.parent { border-left: 6px solid var(--vert); }
+.choix-compte strong { font-family: var(--titre); font-size: 1.3rem; }
+.choix-compte .type-badge { align-self: flex-start; }
+.choix-compte .aller { color: var(--terre); font-weight: 700; margin-top: .3rem; }
+.deux-espaces { display: grid; gap: .8rem; margin: 1.2rem 0 .6rem; }
+.deux-espaces .espace { background: var(--feuille); border: 1.5px solid var(--bord); border-radius: var(--rayon); padding: .9rem; }
+.deux-espaces .espace.repetiteur { border-left: 6px solid var(--indigo); }
+.deux-espaces .espace.parent { border-left: 6px solid var(--vert); }
+.deux-espaces .espace p { margin: .5rem 0 .7rem; font-size: .95rem; }
+.deja-inscrit { font-size: .9rem; color: var(--muet); }
+@media (min-width: 700px) { .deux-espaces { grid-template-columns: 1fr 1fr; } }

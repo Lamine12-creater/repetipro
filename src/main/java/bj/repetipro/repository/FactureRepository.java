@@ -14,4 +14,5 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
     boolean existsByEleveIdAndAnneeAndMois(Long eleveId, int annee, int mois);
     List<Facture> findTop8ByOrderByIdDesc();
     long countByStatut(StatutFacture statut);
+    List<Facture> findTop12ByEleveIdOrderByIdDesc(Long eleveId);
 }

@@ -20,6 +20,19 @@ public class UtilisateurConnecte implements UserDetails {
     private final String motDePasseHash;
     private final boolean admin;
     private final boolean actif;
+    private boolean parent;
+    private String nomAffiche;
+
+    /** Compte parent : rôle ROLE_PARENT uniquement (jamais répétiteur ni admin). */
+    public static UtilisateurConnecte pourParent(Long id, String telephone, String hash, String nom) {
+        UtilisateurConnecte u = new UtilisateurConnecte(id, telephone, hash, false, true);
+        u.parent = true;
+        u.nomAffiche = nom;
+        return u;
+    }
+
+    public boolean isParent() { return parent; }
+    public String getNomAffiche() { return nomAffiche; }
 
     public UtilisateurConnecte(Long id, String telephone, String motDePasseHash, boolean admin) {
         this(id, telephone, motDePasseHash, admin, true);
@@ -42,6 +55,10 @@ public class UtilisateurConnecte implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> roles = new ArrayList<>();
+        if (parent) {
+            roles.add(new SimpleGrantedAuthority("ROLE_PARENT"));
+            return roles;
+        }
         roles.add(new SimpleGrantedAuthority("ROLE_REPETITEUR"));
         if (admin) {
             roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));

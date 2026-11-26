@@ -14,4 +14,6 @@ public interface EleveRepository extends JpaRepository<Eleve, Long> {
     long countByRepetiteurIdAndActifTrue(Long repetiteurId);
     List<Eleve> findTop8ByOrderByIdDesc();
     long countByActifTrue();
+    List<Eleve> findByWhatsappParentAndActifTrueOrderByNomAsc(String whatsappParent);
+    List<Eleve> findTop8ByCreneauxMajLeNotNullOrderByCreneauxMajLeDesc();
 }

@@ -25,13 +25,15 @@ import java.util.stream.Collectors;
 public class RepetiteurService implements UserDetailsService {
 
     private final RepetiteurRepository repo;
+    private final bj.repetipro.repository.ParentRepository parents;
     private final PasswordEncoder encodeur;
     /** Téléphones administrateurs, lus dans la config (repetipro.admin-telephones). */
     private final Set<String> telephonesAdmin;
 
-    public RepetiteurService(RepetiteurRepository repo, PasswordEncoder encodeur,
+    public RepetiteurService(RepetiteurRepository repo, bj.repetipro.repository.ParentRepository parents, PasswordEncoder encodeur,
                              @Value("${repetipro.admin-telephones:}") String admins) {
         this.repo = repo;
+        this.parents = parents;
         this.encodeur = encodeur;
         this.telephonesAdmin = Arrays.stream(admins.split(","))
                 .map(Telephones::normaliser)
@@ -44,7 +46,12 @@ public class RepetiteurService implements UserDetailsService {
     public UserDetails loadUserByUsername(String saisie) throws UsernameNotFoundException {
         String tel = Telephones.normaliser(saisie);
         Repetiteur r = (tel == null ? null : repo.findByTelephone(tel).orElse(null));
-        if (r == null) throw new UsernameNotFoundException("Compte introuvable");
+        if (r == null) {
+            // Pas un répétiteur : peut-être un parent
+            bj.repetipro.model.CompteParent p = (tel == null ? null : parents.findByTelephone(tel).orElse(null));
+            if (p == null) throw new UsernameNotFoundException("Compte introuvable");
+            return UtilisateurConnecte.pourParent(p.getId(), p.getTelephone(), p.getMotDePasseHash(), p.getNomComplet());
+        }
         boolean superAdmin = telephonesAdmin.contains(r.getTelephone());
         // Un SuperAdmin ne peut jamais être bloqué (sinon plus personne ne pourrait réparer).
         return new UtilisateurConnecte(r.getId(), r.getTelephone(), r.getMotDePasseHash(),
@@ -56,6 +63,7 @@ public class RepetiteurService implements UserDetailsService {
     public Repetiteur inscrire(String nomComplet, String telephoneSaisi, String motDePasse) {
         String tel = Telephones.normaliser(telephoneSaisi);
         if (tel == null) throw new IllegalArgumentException("Numéro invalide. Exemple : 01 97 00 00 00");
+        if (parents.existsByTelephone(tel)) throw new IllegalArgumentException("Ce numéro est déjà utilisé par un compte parent. Un numéro ne peut avoir qu'un seul type de compte : utilisez un autre numéro pour votre compte répétiteur.");
         if (repo.existsByTelephone(tel)) throw new IllegalArgumentException("Un compte existe déjà avec ce numéro.");
         Repetiteur r = new Repetiteur();
         r.setNomComplet(nomComplet.trim());

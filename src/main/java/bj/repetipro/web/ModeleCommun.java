@@ -18,7 +18,11 @@ public class ModeleCommun {
 
     private final bj.repetipro.service.ParametreService parametres;
 
-    public ModeleCommun(RepetiteurService repetiteurs, bj.repetipro.service.ParametreService parametres) {
+    private final bj.repetipro.service.ParentService parents;
+
+    public ModeleCommun(RepetiteurService repetiteurs, bj.repetipro.service.ParametreService parametres,
+                        bj.repetipro.service.ParentService parents) {
+        this.parents = parents;
         this.repetiteurs = repetiteurs;
         this.parametres = parametres;
     }
@@ -29,7 +33,13 @@ public class ModeleCommun {
 
     @ModelAttribute("moi")
     public Repetiteur moi(@AuthenticationPrincipal UtilisateurConnecte u) {
-        return u == null ? null : repetiteurs.trouver(u.getId());
+        return u == null || u.isParent() ? null : repetiteurs.trouver(u.getId());
+    }
+
+    /** Le parent connecté (pages /parent), sinon null. */
+    @ModelAttribute("moiParent")
+    public bj.repetipro.model.CompteParent moiParent(@AuthenticationPrincipal UtilisateurConnecte u) {
+        return u != null && u.isParent() ? parents.trouver(u.getId()) : null;
     }
 
     /** Rubrique courante ("eleves", "seances"...) pour surligner le bon onglet du menu. */
@@ -41,6 +51,7 @@ public class ModeleCommun {
         if (uri.startsWith("/factures")) return "factures";
         if (uri.startsWith("/tableau-de-bord")) return "accueil";
         if (uri.startsWith("/admin")) return "admin";
+        if (uri.startsWith("/parent")) return "parent";
         return "";
     }
 

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Fiche élève')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu" id="contenu">
+    <p class="surtitre"><a th:href="@{/eleves}">← Mes élèves</a></p>
+    <div class="carte-titre">
+      <h1 th:text="${eleve.nom}">Nom</h1>
+      <a th:href="@{/eleves/{id}/modifier(id=${eleve.id})}" class="petit">Modifier</a>
+    </div>
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <section class="carte">
+      <p class="petit" th:text="${eleve.classe + (eleve.matieres != null and !eleve.matieres.isBlank() ? ' · ' + eleve.matieres : '')}">3ème · Maths</p>
+      <div class="grille-2 infos-fixes">
+        <div><span class="petit">Tarif mensuel</span><p class="montant-fixe" th:text="${@fmt.fcfa(eleve.tarifMensuel)}">25 000 FCFA</p></div>
+        <div><span class="petit">Règle de la classe</span><p class="montant-fixe regle" th:text="${regle.texte()}">2 séances de 2 h par semaine</p></div>
+      </div>
+      <p class="petit">Tarif et durée sont fixés par RépétiPro pour la classe. Vous les voyez mais ne pouvez pas les modifier : vous pointez seulement les séances.</p>
+    </section>
+
+    <!-- Parent : compte et invitation -->
+    <section class="carte">
+      <h2>Parent</h2>
+      <p th:if="${eleve.whatsappParent == null}" class="alerte info">
+        Pas de numéro de parent : <a th:href="@{/eleves/{id}/modifier(id=${eleve.id})}">ajoutez-le</a> pour qu'il puisse choisir les créneaux.</p>
+      <p th:if="${eleve.whatsappParent != null}">
+        <strong th:text="${eleve.nomParent ?: 'Parent'}">Mme X</strong> · <span th:text="${@fmt.tel(eleve.whatsappParent)}">01 …</span><br>
+        <span class="badge paye" th:if="${compteParent != null}">Compte parent créé</span>
+        <span class="badge attente" th:if="${compteParent == null}">Pas encore inscrit</span>
+      </p>
+      <p class="petit" th:if="${compteParent == null}">Quand il crée son compte parent avec ce numéro, il voit son enfant tout de suite.</p>
+      <a th:if="${compteParent == null}" th:href="${lienInvitation}" target="_blank" rel="noopener" class="btn bloc whatsapp">Inviter le parent sur WhatsApp</a>
+    </section>
+
+    <!-- Créneaux choisis par le parent (lecture seule pour le répétiteur) -->
+    <section class="carte">
+      <h2>Créneaux de la semaine</h2>
+      <ul class="liste" th:unless="${creneaux.isEmpty()}">
+        <li th:each="c : ${creneaux}"><div class="infos"><strong th:text="${c.resume}">Mardi · 17h00 – 19h00</strong></div></li>
+      </ul>
+      <p class="alerte info" th:if="${!complet}">
+        <span th:if="${creneaux.isEmpty()}">Le parent n'a pas encore choisi les jours et heures des séances.</span>
+        <span th:unless="${creneaux.isEmpty()}">Les créneaux ne correspondent plus à la règle de la classe : le parent doit les rechoisir.</span>
+        C'est lui qui les choisit depuis son compte.</p>
+      <p class="petit" th:if="${complet}">Choisis par le parent. Vous ne pouvez pas les modifier ; vous pointez les séances quand elles ont lieu.</p>
+    </section>
+
+    <section class="carte">
+      <h2>Séances à pointer</h2>
+      <ul class="liste" th:unless="${prochaines.isEmpty()}">
+        <li th:each="s : ${prochaines}" class="seance-ligne">
+          <span class="heure" th:text="${#temporals.format(s.debut, 'EEE d')}">mar. 20</span>
+          <div class="infos"><strong th:text="${#temporals.format(s.debut, 'HH''h''mm') + ' · ' + s.dureeLisible}">17h00 · 2 h</strong></div>
+          <th:block th:if="${s.presence.name() == 'NON_POINTEE'}">
+            <div th:replace="~{fragments :: pointage(${s}, ${'/eleves/' + eleve.id})}"></div>
+          </th:block>
+          <a th:unless="${s.presence.name() == 'NON_POINTEE'}" th:href="@{/seances/{id}(id=${s.id})}" class="badge"
+             th:classappend="${s.presence.name() == 'ABSENT'} ? 'retard' : 'paye'" th:text="${s.presence.libelle}">Présent</a>
+        </li>
+      </ul>
+      <p class="vide" th:if="${prochaines.isEmpty()}">Aucune séance prévue.</p>
+    </section>
+  </main>
+  <nav th:replace="~{fragments :: navBas('eleves')}"></nav>
+</body>
+</html>

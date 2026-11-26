@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Mon enfant')}"></head>
+<body>
+  <header th:replace="~{fragments :: barreParent}"></header>
+  <main class="contenu" id="contenu">
+    <p class="surtitre"><a th:href="@{/parent}">← Mes enfants</a></p>
+    <h1 th:text="${enfant.nom}">Nom de l'enfant</h1>
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <section class="carte">
+      <p class="petit" th:text="${enfant.classe + ' · répétiteur : ' + repetiteurNom}">3ème</p>
+      <div class="grille-2 infos-fixes">
+        <div><span class="petit">Tarif mensuel</span><p class="montant-fixe" th:text="${@fmt.fcfa(enfant.tarifMensuel)}">25 000 FCFA</p></div>
+        <div><span class="petit">Règle de la classe</span><p class="montant-fixe regle" th:text="${regle.texte()}">2 séances de 2 h par semaine</p></div>
+      </div>
+      <p class="petit">Le tarif et la durée des séances sont fixés par RépétiPro pour chaque classe : ils ne se négocient pas.</p>
+    </section>
+
+    <!-- Choix des créneaux par le parent -->
+    <form class="carte" th:action="@{/parent/eleves/{id}/creneaux(id=${enfant.id})}" method="post" id="form-creneaux">
+      <h2 th:text="${complet ? 'Vos créneaux' : 'Choisissez vos créneaux'}">Choisissez vos créneaux</h2>
+      <div class="alerte info" th:if="${!complet}">Choisissez
+        <strong th:text="${regle.seances() + (regle.seances() > 1 ? ' jours différents' : ' jour')}">2 jours différents</strong>
+        et l'heure de début. Chaque séance dure <strong th:text="${regle.heures() + ' h'}">2 h</strong>, l'heure de fin s'affiche toute seule.
+        Vous pourrez les modifier ici quand vous voulez.</div>
+      <div class="creneau-ligne" th:each="i : ${lignes}"
+           th:with="selJ=${saisieJours != null and i < saisieJours.size() ? saisieJours[i] : (i < creneaux.size() ? creneaux[i].jour + '' : '')},
+                    selH=${saisieHeures != null and i < saisieHeures.size() ? saisieHeures[i] : (i < creneaux.size() ? creneaux[i].heureDebut.toString() : '')}">
+        <strong th:text="'Séance ' + ${i + 1}">Séance 1</strong>
+        <div class="grille-2">
+          <div>
+            <label th:for="'jour' + ${i}">Jour</label>
+            <select th:id="'jour' + ${i}" name="jour" required>
+              <option value="">Choisir…</option>
+              <option th:each="j, it : ${jours}" th:value="${it.count}" th:text="${j}" th:selected="${selJ == (it.count + '')}">Lundi</option>
+            </select>
+          </div>
+          <div>
+            <label th:for="'heure' + ${i}">Début</label>
+            <select th:id="'heure' + ${i}" name="heure" class="heure-debut" th:attr="data-duree=${regle.dureeMinutes()}" required>
+              <option value="">Choisir…</option>
+              <option th:each="h : ${heures}" th:value="${h}" th:text="${#strings.replace(h, ':', 'h')}" th:selected="${selH == h}">17h00</option>
+            </select>
+          </div>
+        </div>
+        <p class="petit fin-seance">Fin : —</p>
+      </div>
+      <p class="petit">Séances possibles entre 7h00 et 22h00, une seule par jour.</p>
+      <p style="margin-top:1rem"><button type="submit" class="btn bloc" th:text="${complet ? 'Enregistrer les modifications' : 'Enregistrer mes créneaux'}">Enregistrer</button></p>
+    </form>
+
+    <section class="carte">
+      <h2>Prochaines séances</h2>
+      <ul class="liste" th:unless="${prochaines.isEmpty()}">
+        <li th:each="s : ${prochaines}">
+          <span class="heure" th:text="${#temporals.format(s.debut, 'EEE d')}">mar. 20</span>
+          <div class="infos"><strong th:text="${#temporals.format(s.debut, 'HH''h''mm') + ' · ' + s.dureeLisible}">17h00 · 2 h</strong></div>
+          <span class="badge" th:classappend="${s.presence.name() == 'ABSENT' ? 'retard' : (s.presence.name() == 'NON_POINTEE' ? 'attente' : 'paye')}"
+                th:text="${s.presence.name() == 'NON_POINTEE' ? 'Prévue' : s.presence.libelle}">Prévue</span>
+        </li>
+      </ul>
+      <p class="vide" th:if="${prochaines.isEmpty()}">Les séances apparaîtront ici une fois vos créneaux choisis.</p>
+    </section>
+
+    <section class="carte">
+      <h2>Présences notées par le répétiteur</h2>
+      <ul class="liste" th:unless="${pointages.isEmpty()}">
+        <li th:each="s : ${pointages}">
+          <span class="heure" th:text="${#temporals.format(s.debut, 'dd/MM')}">20/10</span>
+          <div class="infos"><strong th:text="${#temporals.format(s.debut, 'EEEE HH''h''mm')}">mardi 17h00</strong>
+            <p class="petit" th:if="${s.notions != null and !s.notions.isBlank()}" th:text="${s.notions}">Notions</p></div>
+          <span class="badge" th:classappend="${s.presence.name() == 'ABSENT' ? 'retard' : 'paye'}" th:text="${s.presence.libelle}">Présent</span>
+        </li>
+      </ul>
+      <p class="vide" th:if="${pointages.isEmpty()}">Aucune séance pointée pour l'instant.</p>
+    </section>
+
+    <section class="carte">
+      <h2>Factures</h2>
+      <ul class="liste" th:unless="${factures.isEmpty()}">
+        <li th:each="f : ${factures}">
+          <div class="infos"><strong th:text="${@fmt.mois(f.periode)}">octobre 2026</strong>
+            <p class="petit" th:text="${f.nombreSeances + ' séance(s) · avant le ' + #temporals.format(f.dateEcheance, 'dd/MM/yyyy')}">…</p></div>
+          <div style="text-align:right"><span class="montant" th:text="${@fmt.fcfa(f.montant)}">25 000 FCFA</span><br>
+            <span class="badge" th:classappend="${f.classeBadge}" th:text="${f.statutAffiche}">Payé</span></div>
+        </li>
+      </ul>
+      <p class="vide" th:if="${factures.isEmpty()}">Pas encore de facture.</p>
+    </section>
+
+    <form class="carte" th:action="@{/parent/eleves/{id}/infos(id=${enfant.id})}" method="post">
+      <h2>Informations de l'élève</h2>
+      <label for="nom">Nom de l'enfant</label>
+      <input id="nom" name="nom" th:value="${enfant.nom}" maxlength="100" required>
+      <label for="classe">Classe</label>
+      <select id="classe" name="classe" required>
+        <option th:each="c : ${classes}" th:value="${c.libelle}" th:text="${c.libelle}" th:selected="${c.libelle == classeActuelle}">3ème</option>
+      </select>
+      <p class="petit">Changer de classe change le tarif mensuel et la règle des séances : vous devrez alors rechoisir vos créneaux.</p>
+      <p style="margin-top:1rem"><button type="submit" class="btn bloc secondaire">Enregistrer</button></p>
+    </form>
+  </main>
+  <script>
+    // Affiche l'heure de fin d'après l'heure de début et la durée fixe de la classe.
+    (function () {
+      function maj(sel) {
+        var cible = sel.closest('.creneau-ligne').querySelector('.fin-seance');
+        if (!sel.value) { cible.textContent = 'Fin : —'; return; }
+        var p = sel.value.split(':'), fin = parseInt(p[0], 10) * 60 + parseInt(p[1], 10) + parseInt(sel.dataset.duree, 10);
+        cible.textContent = 'Fin : ' + String(Math.floor(fin / 60)).padStart(2, '0') + 'h' + String(fin % 60).padStart(2, '0');
+      }
+      document.querySelectorAll('.heure-debut').forEach(function (s) { s.addEventListener('change', function () { maj(s); }); maj(s); });
+    })();
+  </script>
+</body>
+</html>

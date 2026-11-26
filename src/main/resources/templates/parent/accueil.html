@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Mes enfants')}"></head>
+<body>
+  <header th:replace="~{fragments :: barreParent}"></header>
+  <main class="contenu" id="contenu">
+    <h1>Mes enfants</h1>
+    <div th:if="${param.bienvenue}" class="alerte succes">Bienvenue ! Voici les élèves liés à votre numéro.</div>
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <section class="carte" th:if="${enfants.isEmpty()}">
+      <p class="vide">Aucun élève n'est encore lié à votre numéro (<strong th:text="${@fmt.tel(moiParent.telephone)}">01 …</strong>).<br>
+        Demandez au répétiteur d'ajouter ce numéro dans la fiche de votre enfant : il apparaîtra ici tout seul.</p>
+    </section>
+
+    <section class="carte enfant" th:each="e : ${enfants}">
+      <div class="carte-titre">
+        <h2 th:text="${e.nom}">Nom</h2>
+        <span class="badge" th:classappend="${complets[e.id]} ? 'paye' : 'attente'"
+              th:text="${complets[e.id] ? 'Créneaux choisis' : 'Créneaux à choisir'}">À choisir</span>
+      </div>
+      <p class="petit" th:text="${e.classe + (e.matieres != null and !e.matieres.isBlank() ? ' · ' + e.matieres : '') + ' · répétiteur : ' + e.repetiteur.nomComplet}">3ème · Maths</p>
+      <p><span class="montant" th:text="${@fmt.fcfa(e.tarifMensuel)}">25 000 FCFA</span> par mois ·
+        <span th:text="${regles[e.id].texte()}">2 séances de 2 h par semaine</span></p>
+      <ul class="liste" th:unless="${creneauxParEleve[e.id].isEmpty()}">
+        <li th:each="c : ${creneauxParEleve[e.id]}"><div class="infos"><strong th:text="${c.resume}">Mardi · 17h00 – 19h00</strong></div></li>
+      </ul>
+      <p style="margin-top:.8rem"><a th:href="@{/parent/eleves/{id}(id=${e.id})}" class="btn bloc"
+         th:text="${complets[e.id] ? 'Voir et modifier' : 'Choisir les créneaux'}">Choisir les créneaux</a></p>
+    </section>
+  </main>
+</body>
+</html>

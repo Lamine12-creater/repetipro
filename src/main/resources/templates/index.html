@@ -12,8 +12,9 @@
         <li><a href="#questions">Questions</a></li>
       </ul>
     </nav>
-    <a th:if="${moi == null}" th:href="@{/connexion}" class="btn-entete">Se connecter</a>
+    <a th:if="${moi == null and moiParent == null}" th:href="@{/connexion}" class="btn-entete">Se connecter</a>
     <a th:if="${moi != null}" th:href="@{/tableau-de-bord}" class="btn-entete">Mon espace</a>
+    <a th:if="${moiParent != null}" th:href="@{/parent}" class="btn-entete">Mon espace parent</a>
   </header>
 
   <main id="contenu">
@@ -26,10 +27,19 @@
           <p class="intro">Vous allez chez les élèves après l'école, vous notez les séances dans un cahier,
             et à la fin du mois il faut relancer les parents pour être payé. RépétiPro garde tout au même endroit :
             qui est venu, ce qui a été travaillé, et qui a payé.</p>
-          <div class="boutons">
-            <a th:href="@{/inscription}" class="btn">Créer mon compte</a>
-            <a th:href="@{/connexion}">J'ai déjà un compte</a>
+          <div class="deux-espaces" id="espaces">
+            <div class="espace repetiteur">
+              <span class="type-badge repetiteur">Espace répétiteur</span>
+              <p>Je donne des cours : élèves, pointage, factures.</p>
+              <a th:href="@{/inscription/repetiteur}" class="btn bloc">Créer mon compte répétiteur</a>
+            </div>
+            <div class="espace parent">
+              <span class="type-badge parent">Espace parent</span>
+              <p>Mon enfant a un répétiteur : je choisis les horaires, je suis les présences.</p>
+              <a th:href="@{/inscription/parent}" class="btn bloc secondaire">Créer mon compte parent</a>
+            </div>
           </div>
+          <p class="deja-inscrit"><a th:href="@{/connexion}">J'ai déjà un compte</a> (répétiteur ou parent : vous arrivez dans votre espace)</p>
           <p class="conditions">Gratuit jusqu'à 3 élèves, sans carte bancaire. Au-delà, 1&nbsp;500&nbsp;FCFA par mois, payés par Mobile Money.</p>
         </div>
 
@@ -116,7 +126,7 @@ Afiavi Houngbo (répétiteur)<span class="heure-msg">18:02</span></div>
             </tbody>
           </table>
           <div class="boutons" style="display:flex;flex-wrap:wrap;gap:.8rem 1.3rem;align-items:center">
-            <a th:href="@{/inscription}" class="btn">Commencer avec la formule gratuite</a>
+            <a th:href="@{/inscription/repetiteur}" class="btn">Commencer avec la formule gratuite</a>
             <a th:href="@{/formule}">Détails de la formule Solo</a>
           </div>
           <p class="petit" style="margin-top:1rem">Vous êtes plusieurs répétiteurs dans une petite structure ? Une formule Agence est prévue, autour de 7&nbsp;000&nbsp;FCFA par mois.</p>
@@ -148,7 +158,7 @@ Afiavi Houngbo (répétiteur)<span class="heure-msg">18:02</span></div>
           <p class="grand">Essayez avec vos élèves de ce mois-ci.</p>
           <p class="petit" style="margin:.4rem 0 0">Trois élèves gratuits. Il faut deux minutes pour créer le compte.</p>
         </div>
-        <a th:href="@{/inscription}" class="btn clair">Créer mon compte</a>
+        <a th:href="@{/inscription/repetiteur}" class="btn clair">Créer mon compte répétiteur</a>
       </div>
     </section>
   </main>
@@ -157,7 +167,7 @@ Afiavi Houngbo (répétiteur)<span class="heure-msg">18:02</span></div>
   <footer class="pied">
     <div class="dedans">
       <span>RépétiPro · fait à Cotonou, Bénin</span>
-      <span>© 2026 · <a th:href="@{/connexion}">Se connecter</a> · <a th:href="@{/admin}" class="lien-admin">Espace admin</a></span>
+      <span>© 2026 · <a th:href="@{/connexion}">Se connecter</a> · <a th:href="@{/inscription/parent}">Espace parent</a> · <a th:href="@{/inscription/repetiteur}">Espace répétiteur</a> · <a th:href="@{/admin}" class="lien-admin">Espace admin</a></span>
     </div>
   </footer>
 </body>

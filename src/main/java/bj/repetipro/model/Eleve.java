@@ -39,6 +39,9 @@ public class Eleve {
     /** Date d'ajout (vide pour les élèves créés avant cette colonne). */
     private java.time.LocalDateTime dateCreation = java.time.LocalDateTime.now();
 
+    /** Dernière fois que le parent a choisi/modifié les créneaux (vide : jamais). */
+    private java.time.LocalDateTime creneauxMajLe;
+
     /** Un élève archivé ne compte plus dans la limite gratuite et n'est plus facturé. */
     @Column(nullable = false)
     private boolean actif = true;
@@ -60,6 +63,8 @@ public class Eleve {
     public int getTarifMensuel() { return tarifMensuel; }
     public void setTarifMensuel(int tarifMensuel) { this.tarifMensuel = tarifMensuel; }
     public java.time.LocalDateTime getDateCreation() { return dateCreation; }
+    public java.time.LocalDateTime getCreneauxMajLe() { return creneauxMajLe; }
+    public void setCreneauxMajLe(java.time.LocalDateTime d) { this.creneauxMajLe = d; }
     public boolean isActif() { return actif; }
     public void setActif(boolean actif) { this.actif = actif; }
 

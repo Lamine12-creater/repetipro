@@ -21,14 +21,17 @@
         <li class="liste-entete" aria-hidden="true"><span>Élève</span><span>Parent</span><span>Tarif</span><span></span></li>
         <li th:each="e : ${eleves}" class="ligne-eleve">
           <div class="infos">
-            <strong th:text="${e.nom}">Nom</strong>
+            <strong><a th:href="@{/eleves/{id}(id=${e.id})}" th:text="${e.nom}" class="lien-nom">Nom</a></strong>
             <p class="petit" th:text="${e.classe + (e.matieres != null and !e.matieres.isBlank() ? ' · ' + e.matieres : '')}">3e · Maths</p>
+            <p class="petit"><span class="badge" th:classappend="${creneauxOk[e.id]} ? 'paye' : 'attente'"
+               th:text="${creneauxOk[e.id] ? 'Créneaux choisis' : 'Créneaux à choisir par le parent'}">À choisir</span></p>
           </div>
           <div class="col-parent" th:text="${e.nomParent ?: '—'}">Mme X</div>
           <div class="col-tarif"><span class="montant" th:text="${@fmt.fcfa(e.tarifMensuel)}">25 000 FCFA</span> / mois</div>
           <div class="actions col-actions">
             <a th:if="${liensWhatsApp[e.id] != null}" class="btn petit-btn whatsapp" target="_blank" rel="noopener"
                th:href="${liensWhatsApp[e.id]}">WhatsApp</a>
+            <a th:href="@{/eleves/{id}(id=${e.id})}" class="lien-discret">Fiche</a>
             <a th:href="@{/eleves/{id}/modifier(id=${e.id})}" class="lien-discret">Modifier</a>
             <form th:action="@{/eleves/{id}/archiver(id=${e.id})}" method="post"
                   onsubmit="return confirm('Archiver cet élève ? Son historique est conservé.')">

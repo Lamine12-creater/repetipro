@@ -18,7 +18,8 @@ public class AdminService {
 
     /** Chiffres clés. */
     public record Stats(long repetiteurs, long repetiteursSolo, long eleves, long seances,
-                        long factures, long facturesPayees, long paiementsPayes, long revenuSolo) {
+                        long factures, long facturesPayees, long paiementsPayes, long revenuSolo,
+                        long parents, long seancesPointees) {
         public String revenuSoloFcfa() { return Montants.fcfa(revenuSolo); }
     }
 
@@ -30,9 +31,11 @@ public class AdminService {
     private final SeanceRepository seances;
     private final FactureRepository factures;
     private final PaiementRepository paiements;
+    private final ParentRepository parents;
 
     public AdminService(RepetiteurRepository repetiteurs, EleveRepository eleves, SeanceRepository seances,
-                        FactureRepository factures, PaiementRepository paiements) {
+                        FactureRepository factures, PaiementRepository paiements, ParentRepository parents) {
+        this.parents = parents;
         this.repetiteurs = repetiteurs;
         this.eleves = eleves;
         this.seances = seances;
@@ -50,7 +53,9 @@ public class AdminService {
                 factures.count(),
                 factures.countByStatut(StatutFacture.PAYE),
                 paiements.countByStatut(StatutPaiement.PAYE),
-                paiements.sommeMontantParStatut(StatutPaiement.PAYE));
+                paiements.sommeMontantParStatut(StatutPaiement.PAYE),
+                parents.count(),
+                seances.countByPointeLeNotNull());
     }
 
     /** Dernières inscriptions, élèves, factures et paiements, du plus récent au plus ancien. */
@@ -75,6 +80,20 @@ public class AdminService {
         for (Paiement p : paiements.findTop8ByOrderByDateCreationDesc()) {
             l.add(new Activite(p.getDateCreation(), "paiement", "Paiement Solo",
                     p.getRepetiteur().getNomComplet() + " · " + Montants.fcfa(p.getMontant()) + " · " + p.getStatut().getLibelle()));
+        }
+        for (CompteParent p : parents.findTop8ByOrderByDateInscriptionDesc()) {
+            l.add(new Activite(p.getDateInscription(), "inscription", "Parent inscrit",
+                    p.getNomComplet() + " (" + Telephones.afficher(p.getTelephone()) + ")"));
+        }
+        for (Eleve e : eleves.findTop8ByCreneauxMajLeNotNullOrderByCreneauxMajLeDesc()) {
+            l.add(new Activite(e.getCreneauxMajLe(), "creneaux", "Créneaux choisis",
+                    e.getNom() + " · " + e.getClasse() + " · chez " + e.getRepetiteur().getNomComplet()));
+        }
+        for (Seance s : seances.findTop8ByPointeLeNotNullOrderByPointeLeDesc()) {
+            l.add(new Activite(s.getPointeLe(), "pointage", "Pointage",
+                    s.getEleve().getNom() + " · " + s.getPresence().getLibelle() + " · "
+                            + s.getDebut().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM HH:mm"))
+                            + " · " + s.getRepetiteur().getNomComplet()));
         }
         l.sort(Comparator.comparing(Activite::date, Comparator.nullsLast(Comparator.reverseOrder())));
         return l.size() > max ? l.subList(0, max) : l;

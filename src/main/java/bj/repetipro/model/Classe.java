@@ -61,6 +61,14 @@ public enum Classe {
     }
 
     /** Vrai si deux libellés désignent la même classe officielle (ou le même texte). */
+    /** Nombre de séances par semaine par défaut : 2 pour toutes les classes. */
+    public int getSeancesParSemaineDefaut() { return 2; }
+
+    /** Durée par défaut d'une séance, en heures : 2 h jusqu'en 3ème (et au primaire), 3 h de la 2nde à la Tle. */
+    public int getDureeHeuresDefaut() {
+        return (this == SECONDE || this == PREMIERE || this == TLE) ? 3 : 2;
+    }
+
     public static boolean meme(String a, String b) {
         if (a == null || b == null) return false;
         Classe ca = de(a), cb = de(b);

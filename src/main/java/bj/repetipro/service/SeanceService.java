@@ -21,8 +21,10 @@ public class SeanceService {
     private final SeanceRepository repo;
     private final EleveService eleves;
     private final RepetiteurService repetiteurs;
+    private final TarifService tarifs;
 
-    public SeanceService(SeanceRepository repo, EleveService eleves, RepetiteurService repetiteurs) {
+    public SeanceService(SeanceRepository repo, EleveService eleves, RepetiteurService repetiteurs, TarifService tarifs) {
+        this.tarifs = tarifs;
         this.repo = repo;
         this.eleves = eleves;
         this.repetiteurs = repetiteurs;
@@ -62,9 +64,29 @@ public class SeanceService {
         return repo.save(s);
     }
 
+    /** Planifie une séance à la main : la durée est celle de la classe, jamais celle envoyée par le formulaire. */
+    @Transactional
+    public Seance planifierSelonRegle(Long repetiteurId, Long eleveId, LocalDateTime debut) {
+        Eleve e = eleves.trouver(eleveId, repetiteurId);
+        return planifier(repetiteurId, eleveId, debut, tarifs.regle(e.getClasse()).dureeMinutes());
+    }
+
+    /** Pointage en un clic : présent, absent ou en retard. Pas de pointage pour un jour à venir. */
+    @Transactional
+    public void pointerRapide(Long id, Long repetiteurId, Presence presence) {
+        if (presence == null || presence == Presence.NON_POINTEE) throw new IllegalArgumentException("Présence invalide");
+        Seance s = trouver(id, repetiteurId);
+        if (s.getDebut().toLocalDate().isAfter(LocalDate.now())) {
+            throw new IllegalStateException("Cette séance n'a pas encore eu lieu : vous pourrez la pointer le jour même.");
+        }
+        s.setPresence(presence);
+        s.setPointeLe(LocalDateTime.now());
+    }
+
     @Transactional
     public void pointer(Long id, Long repetiteurId, Presence presence, String notions, String compteRendu) {
         Seance s = trouver(id, repetiteurId);
+        if (presence != s.getPresence() && presence != Presence.NON_POINTEE) s.setPointeLe(LocalDateTime.now());
         s.setPresence(presence);
         s.setNotions(notions);
         s.setCompteRendu(compteRendu);

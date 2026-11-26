@@ -23,8 +23,16 @@ public class EleveController {
     private final EleveService eleves;
     private final bj.repetipro.service.RepetiteurService repetiteurs;
     private final TarifService tarifs;
+    private final bj.repetipro.service.PlanningService planning;
+    private final bj.repetipro.service.ParentService parentsService;
+    private final bj.repetipro.repository.SeanceRepository seancesRepo;
 
-    public EleveController(EleveService eleves, bj.repetipro.service.RepetiteurService repetiteurs, TarifService tarifs) {
+    public EleveController(EleveService eleves, bj.repetipro.service.RepetiteurService repetiteurs, TarifService tarifs,
+                           bj.repetipro.service.PlanningService planning, bj.repetipro.service.ParentService parentsService,
+                           bj.repetipro.repository.SeanceRepository seancesRepo) {
+        this.planning = planning;
+        this.parentsService = parentsService;
+        this.seancesRepo = seancesRepo;
         this.eleves = eleves;
         this.repetiteurs = repetiteurs;
         this.tarifs = tarifs;
@@ -44,10 +52,51 @@ public class EleveController {
             if (l != null) liens.put(e.getId(), l);
         }
         model.addAttribute("liensWhatsApp", liens);
+        java.util.Map<Long, Boolean> creneauxOk = new java.util.HashMap<>();
+        for (bj.repetipro.model.Eleve e : liste) creneauxOk.put(e.getId(), planning.creneauxComplets(e));
+        model.addAttribute("creneauxOk", creneauxOk);
         model.addAttribute("archives", eleves.archives(moi.getId()));
         model.addAttribute("peutAjouter", eleves.peutAjouter(moi.getId()));
         model.addAttribute("limite", EleveService.LIMITE_GRATUITE);
         return "eleves/liste";
+    }
+
+    /** Fiche d'un élève : règle de séances, créneaux choisis par le parent, séances à pointer, invitation du parent. */
+    @GetMapping("/{id}")
+    public String fiche(@AuthenticationPrincipal UtilisateurConnecte moi, @PathVariable Long id, Model model,
+                        jakarta.servlet.http.HttpServletRequest requete) {
+        Eleve e = eleves.trouver(id, moi.getId());
+        planning.genererPourEleve(e);
+        model.addAttribute("eleve", e);
+        model.addAttribute("regle", planning.regle(e));
+        model.addAttribute("creneaux", planning.creneaux(e.getId()));
+        model.addAttribute("complet", planning.creneauxComplets(e));
+        model.addAttribute("compteParent", parentsService.parTelephone(e.getWhatsappParent()).orElse(null));
+        model.addAttribute("prochaines", seancesRepo.findByEleveIdAndDebutGreaterThanEqualOrderByDebutAsc(
+                e.getId(), java.time.LocalDate.now().minusDays(7).atStartOfDay()).stream().limit(12).toList());
+        String lien = lienInvitation(e, repetiteurs.trouver(moi.getId()).getPrenom(), requete);
+        model.addAttribute("lienInvitation", lien);
+        model.addAttribute("urlInscriptionParent", urlInscription(requete));
+        return "eleves/fiche";
+    }
+
+    private static String urlInscription(jakarta.servlet.http.HttpServletRequest requete) {
+        return org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromContextPath(requete)
+                .path("/inscription/parent").build().toUriString();
+    }
+
+    /** Lien wa.me : invitation du parent à créer son compte (avec le lien d'inscription pré-rempli dans le message). */
+    static String lienInvitation(Eleve e, String prenomRepetiteur, jakarta.servlet.http.HttpServletRequest requete) {
+        String tel = e.getWhatsappParent() == null ? "" : Telephones.afficher(e.getWhatsappParent());
+        String msg = "Bonjour" + (e.getNomParent() == null || e.getNomParent().isBlank() ? "" : " " + e.getNomParent())
+                + ", c'est " + prenomRepetiteur + ", le répétiteur de " + e.getPrenom() + ".\n"
+                + "Créez votre compte parent sur RépétiPro avec ce numéro (" + tel + ") : vous choisirez vous-même les jours "
+                + "et heures des séances de la semaine, et vous suivrez les présences et les factures.\n"
+                + urlInscription(requete);
+        if (e.getWhatsappParent() == null || e.getWhatsappParent().isBlank()) {
+            return "https://wa.me/?text=" + java.net.URLEncoder.encode(msg, java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20");
+        }
+        return bj.repetipro.util.WhatsApp.lien(e.getWhatsappParent(), msg);
     }
 
     @GetMapping("/nouveau")

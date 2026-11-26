@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Créer un compte')}"></head>
+<body>
+  <header class="entete-site">
+    <a th:replace="~{fragments :: logo(@{/})}"></a>
+  </header>
+  <main class="page-connexion page-choix" id="contenu">
+    <h1>Créer un compte</h1>
+    <p class="petit">Deux types de compte, pour deux usages. Choisissez le vôtre.</p>
+
+    <a th:href="@{/inscription/repetiteur}" class="choix-compte repetiteur">
+      <span class="type-badge repetiteur">Répétiteur</span>
+      <strong>Je suis répétiteur</strong>
+      <span>Je donne des cours à domicile : je suis mes élèves, je pointe les séances et je suis payé.</span>
+      <span class="aller">Créer mon compte répétiteur →</span>
+    </a>
+    <a th:href="@{/inscription/parent}" class="choix-compte parent">
+      <span class="type-badge parent">Parent</span>
+      <strong>Je suis parent</strong>
+      <span>Mon enfant a un répétiteur : je choisis les jours et heures des séances, je vois les présences et les factures.</span>
+      <span class="aller">Créer mon compte parent →</span>
+    </a>
+    <p class="apres">Déjà inscrit ? <a th:href="@{/connexion}">Se connecter</a> (le même écran pour tous : vous arrivez dans votre espace).</p>
+  </main>
+</body>
+</html>

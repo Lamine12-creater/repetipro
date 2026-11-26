@@ -37,6 +37,17 @@ public class Seance {
     @Column(length = 2000)
     private String compteRendu;
 
+    /** Vrai si la séance vient des créneaux choisis par le parent (colonne facultative). */
+    private Boolean automatique;
+
+    /** Moment du pointage (colonne facultative). */
+    private LocalDateTime pointeLe;
+
+    public Boolean getAutomatique() { return automatique; }
+    public void setAutomatique(Boolean automatique) { this.automatique = automatique; }
+    public LocalDateTime getPointeLe() { return pointeLe; }
+    public void setPointeLe(LocalDateTime pointeLe) { this.pointeLe = pointeLe; }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Repetiteur getRepetiteur() { return repetiteur; }

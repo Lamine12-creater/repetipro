@@ -40,9 +40,31 @@
       <li th:if="${estAdmin}"><a th:href="@{/admin}" th:classappend="${rubrique == 'admin'} ? 'actif'">Admin</a></li>
     </ul>
   </nav>
+  <span class="type-badge sur-barre" th:classappend="${estAdmin} ? 'admin' : 'repetiteur'"
+        th:text="${estAdmin} ? 'SuperAdmin' : 'Répétiteur'">Répétiteur</span>
   <a th:href="@{/parametres}" class="avatar" title="Paramètres"
      th:text="${moi != null ? moi.initiales : '?'}">RD</a>
 </header>
+
+<!-- Barre du haut de l'espace parent : logo, nom, déconnexion -->
+<header th:fragment="barreParent" class="barre">
+  <a href="#contenu" class="lien-evitement">Aller au contenu</a>
+  <a th:replace="~{fragments :: logo(@{/parent})}"></a>
+  <form th:action="@{/deconnexion}" method="post" class="deconnexion-parent">
+    <span class="type-badge sur-barre parent">Parent</span>
+    <span class="petit-nom" th:text="${moiParent != null ? moiParent.nomComplet : ''}">Parent</span>
+    <button type="submit" class="btn petit-btn secondaire claire">Se déconnecter</button>
+  </form>
+</header>
+
+<!-- Pointage en un clic d'une séance (répétiteur) : retour = page où revenir -->
+<form th:fragment="pointage(s, retour)" th:action="@{/seances/{id}/pointage(id=${s.id})}" method="post" class="pointage-rapide"
+      aria-label="Pointer la séance">
+  <input type="hidden" name="retour" th:value="${retour}">
+  <button type="submit" name="presence" value="PRESENT" class="btn petit-btn">Présent</button>
+  <button type="submit" name="presence" value="ABSENT" class="btn petit-btn secondaire">Absent</button>
+  <a th:href="@{/seances/{id}(id=${s.id})}" class="lien-discret">Compte rendu</a>
+</form>
 
 <!-- Messages de confirmation / erreur (passés par "flash" après une redirection) -->
 <div th:fragment="messages" th:remove="tag">

@@ -81,6 +81,7 @@ public class AdminController {
     public String tarifs(Model model) {
         model.addAttribute("classes", Classe.values());
         model.addAttribute("grille", tarifs.grille());
+        model.addAttribute("regles", tarifs.regles());
         return "admin/tarifs";
     }
 
@@ -91,6 +92,7 @@ public class AdminController {
             model.addAttribute("erreur", erreur);
             model.addAttribute("classes", Classe.values());
             model.addAttribute("grille", tarifs.grille());
+        model.addAttribute("regles", tarifs.regles());
             model.addAttribute("saisie", saisie);
             return "admin/tarifs";
         }

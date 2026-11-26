@@ -20,6 +20,12 @@
     </div>
     <div th:replace="~{fragments :: messages}"></div>
 
+    <div th:if="${!sansCreneaux.isEmpty()}" class="alerte info">
+      <strong th:text="${sansCreneaux.size() + (sansCreneaux.size() > 1 ? ' élèves' : ' élève')}">2 élèves</strong>
+      n'ont pas encore leurs créneaux : c'est le parent qui les choisit depuis son compte.
+      <a th:href="@{/eleves}">Voir mes élèves</a> pour inviter le parent.
+    </div>
+
     <div class="colonnes">
       <!-- Séances du jour -->
       <section class="carte">
@@ -31,12 +37,26 @@
               <strong th:text="${s.eleve.nom}">Élève</strong>
               <p class="petit" th:text="${s.eleve.classe + ' · ' + (s.eleve.matieres ?: '') + ' · ' + s.dureeLisible}">3e · Maths · 2 h</p>
             </div>
-            <a th:if="${s.presence.name() == 'NON_POINTEE'}" th:href="@{/seances/{id}(id=${s.id})}" class="btn petit-btn">Pointer</a>
+            <div th:if="${s.presence.name() == 'NON_POINTEE'}" th:replace="~{fragments :: pointage(${s}, '/tableau-de-bord')}"></div>
             <a th:unless="${s.presence.name() == 'NON_POINTEE'}" th:href="@{/seances/{id}(id=${s.id})}"
                class="badge" th:classappend="${s.presence.name() == 'ABSENT'} ? 'retard' : 'paye'" th:text="${s.presence.libelle}">Présent</a>
           </li>
         </ul>
         <p th:if="${seancesDuJour.isEmpty()}" class="vide">Pas de séance prévue aujourd'hui. <a th:href="@{/seances}">En planifier une</a></p>
+      </section>
+
+      <!-- Séances des jours suivants, d'après les créneaux choisis par les parents -->
+      <section class="carte" th:unless="${cetteSemaine.isEmpty()}">
+        <div class="carte-titre"><h2>Cette semaine</h2><a th:href="@{/seances}" class="petit">Tout le planning</a></div>
+        <ul class="liste">
+          <li th:each="s : ${cetteSemaine}">
+            <span class="heure" th:text="${#temporals.format(s.debut, 'EEE d')}">mer. 21</span>
+            <div class="infos">
+              <strong th:text="${s.eleve.nom}">Élève</strong>
+              <p class="petit" th:text="${#temporals.format(s.debut, 'HH''h''mm') + ' · ' + s.dureeLisible}">17h00 · 2 h</p>
+            </div>
+          </li>
+        </ul>
       </section>
 
       <!-- Factures impayées -->

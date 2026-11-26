@@ -21,8 +21,10 @@ public class EleveService {
     private final EleveRepository repo;
     private final RepetiteurService repetiteurs;
     private final TarifService tarifs;
+    private final PlanningService planning;
 
-    public EleveService(EleveRepository repo, RepetiteurService repetiteurs, TarifService tarifs) {
+    public EleveService(EleveRepository repo, RepetiteurService repetiteurs, TarifService tarifs, PlanningService planning) {
+        this.planning = planning;
         this.repo = repo;
         this.repetiteurs = repetiteurs;
         this.tarifs = tarifs;
@@ -90,6 +92,7 @@ public class EleveService {
         boolean classeChangee = ancienne != null && !Classe.meme(ancienne, nouvelle);
         if (nouveau || classeChangee) {
             e.setTarifMensuel(tarifs.montant(nouvelle));
+            if (classeChangee) planning.reconcilier(e);
         }
     }
 }
