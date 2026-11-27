@@ -135,8 +135,16 @@ public class ParentController {
     /** Choix des créneaux auprès d'un répétiteur donné. */
     @GetMapping("/enfants/{id}/demande")
     public String formulaireDemande(@AuthenticationPrincipal UtilisateurConnecte moi, @PathVariable Long id,
-                                    @RequestParam Long repetiteur, Model model) {
-        remplirDemande(moi, id, repetiteur, model);
+                                    @RequestParam Long repetiteur, Model model, RedirectAttributes flash) {
+        try {
+            remplirDemande(moi, id, repetiteur, model);
+        } catch (bj.repetipro.service.RessourceIntrouvableException ex) {
+            if (ex.getMessage() != null && ex.getMessage().startsWith("Répétiteur")) {
+                flash.addFlashAttribute("erreur", "Ce répétiteur n'est plus disponible. Choisissez-en un autre.");
+                return "redirect:/parent/enfants/" + id + "/repetiteurs";
+            }
+            throw ex;
+        }
         return "parent/demande";
     }
 

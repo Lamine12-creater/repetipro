@@ -287,6 +287,8 @@ class DemandeIntegrationTest {
         mvc.perform(demande(parent, enfantId, admin.getId(), new String[]{"1", "3"}, new String[]{"10:00", "10:00"}))
                 .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("erreur"));
         assertTrue(demandeRepo.findByEnfantIdOrderByIdDesc(enfantId).isEmpty());
+        mvc.perform(get("/parent/enfants/{id}/demande", enfantId).with(user(parent)).param("repetiteur", String.valueOf(suspendu.getId())))
+                .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("erreur"));
         // Pas de modification de la classe pendant une demande en cours
         mvc.perform(demande(parent, enfantId, actif.getId(), new String[]{"1", "3"}, new String[]{"10:00", "10:00"}))
                 .andExpect(status().is3xxRedirection());
