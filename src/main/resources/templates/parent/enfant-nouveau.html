@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Ajouter mon enfant')}"></head>
+<body>
+  <header th:replace="~{fragments :: barreParent}"></header>
+  <main class="contenu" id="contenu">
+    <p class="surtitre"><a th:href="@{/parent}">← Mes enfants</a></p>
+    <h1>Ajouter mon enfant</h1>
+    <div th:replace="~{fragments :: messages}"></div>
+    <div class="etapes" aria-label="Étapes"><span class="actif">1. Mon enfant</span><span>2. Répétiteur</span><span>3. Horaires</span></div>
+    <form class="carte" th:action="@{/parent/enfants}" method="post">
+      <div class="alerte erreur" th:if="${erreur}" th:text="${erreur}">Erreur</div>
+      <label for="nom">Nom de l'enfant</label>
+      <input id="nom" name="nom" th:value="${saisieNom}" maxlength="100" required autofocus placeholder="Ex. Awa Dossou">
+      <label for="classe">Classe</label>
+      <select id="classe" name="classe" required>
+        <option value="">Choisir la classe…</option>
+        <option th:each="c : ${classes}" th:value="${c.libelle}" th:text="${c.libelle}"
+                th:attr="data-tarif=${tarifTxt[c.libelle]},data-regle=${regleTxt[c.libelle]}"
+                th:selected="${c.libelle == saisieClasse}">3ème</option>
+      </select>
+      <div class="alerte info" id="apercu" hidden>
+        Tarif : <strong id="apercu-tarif">—</strong> par mois · <span id="apercu-regle">—</span>.
+        Ce tarif et cette règle sont fixés par RépétiPro pour la classe : le répétiteur ne peut pas les modifier.
+      </div>
+      <p style="margin-top:1rem"><button type="submit" class="btn bloc">Continuer : choisir un répétiteur</button></p>
+    </form>
+  </main>
+  <script>
+    (function () {
+      var s = document.getElementById('classe'), a = document.getElementById('apercu');
+      function maj() {
+        var o = s.options[s.selectedIndex];
+        if (!o || !o.value) { a.hidden = true; return; }
+        document.getElementById('apercu-tarif').textContent = o.dataset.tarif;
+        document.getElementById('apercu-regle').textContent = o.dataset.regle;
+        a.hidden = false;
+      }
+      s.addEventListener('change', maj); maj();
+    })();
+  </script>
+</body>
+</html>

@@ -63,30 +63,35 @@ public class PlanningService {
         return l.size() == r.seances() && l.stream().allMatch(c -> c.getDureeMinutes() == r.dureeMinutes());
     }
 
-    /**
-     * Enregistre les créneaux choisis par le parent. Contrôles côté serveur : durée non modifiable,
-     * exactement N créneaux, jours distincts, pas de 30 min, dans la plage horaire.
-     * @return un message d'erreur lisible, ou null si tout est enregistré
-     */
-    @Transactional
-    public String enregistrer(Long eleveId, List<String> jours, List<String> heures, String dureeSoumise) {
-        Eleve e = eleves.findById(eleveId).orElseThrow(() -> new RessourceIntrouvableException("Élève introuvable"));
-        TarifService.Regle r = regle(e);
-        int duree = r.dureeMinutes();
+    /** Un créneau hebdomadaire analysé (jour 1 = lundi … 7 = dimanche). */
+    public record Plage(int jour, LocalTime debut, int dureeMinutes) {
+        public LocalTime fin() { return debut.plusMinutes(dureeMinutes); }
+        public boolean chevauche(Plage o) { return jour == o.jour && debut.isBefore(o.fin()) && o.debut.isBefore(fin()); }
+        public String resume() { return Jours.libelle(jour) + " · " + Jours.heure(debut) + " – " + Jours.heure(fin()); }
+    }
 
+    /** Résultat de l'analyse d'une saisie : un message d'erreur, ou les créneaux valides. */
+    public record Analyse(String erreur, List<Plage> plages) { }
+
+    /**
+     * Contrôle une saisie de créneaux d'après la règle de la classe : durée non modifiable, exactement N créneaux,
+     * jours distincts, pas de 30 min, séance entre 7h00 et 22h00.
+     */
+    public Analyse analyser(TarifService.Regle r, List<String> jours, List<String> heures, String dureeSoumise) {
+        int duree = r.dureeMinutes();
         if (dureeSoumise != null && !dureeSoumise.isBlank()) {
             String d = dureeSoumise.trim();
             if (!d.equals(String.valueOf(duree)) && !d.equals(String.valueOf(r.heures()))) {
-                return "La durée des séances est fixée à " + r.heures() + " h pour cette classe : elle ne peut pas être modifiée.";
+                return new Analyse("La durée des séances est fixée à " + r.heures() + " h pour cette classe : elle ne peut pas être modifiée.", null);
             }
         }
         List<String> js = jours == null ? List.of() : jours;
         List<String> hs = heures == null ? List.of() : heures;
         if (js.size() != r.seances() || hs.size() != r.seances()) {
-            return "Choisissez exactement " + r.seances() + (r.seances() > 1 ? " créneaux" : " créneau") + " par semaine.";
+            return new Analyse("Choisissez exactement " + r.seances() + (r.seances() > 1 ? " créneaux" : " créneau") + " par semaine.", null);
         }
         Set<Integer> dejaVus = new HashSet<>();
-        List<CreneauEleve> nouveaux = new ArrayList<>();
+        List<Plage> plages = new ArrayList<>();
         for (int i = 0; i < r.seances(); i++) {
             int jour;
             LocalTime debut;
@@ -94,26 +99,71 @@ public class PlanningService {
                 jour = Integer.parseInt(js.get(i).trim());
                 debut = LocalTime.parse(hs.get(i).trim());
             } catch (RuntimeException ex) {
-                return "Jour ou heure invalide pour le créneau " + (i + 1) + ".";
+                return new Analyse("Jour ou heure invalide pour le créneau " + (i + 1) + ".", null);
             }
-            if (jour < 1 || jour > 7) return "Jour invalide pour le créneau " + (i + 1) + ".";
+            if (jour < 1 || jour > 7) return new Analyse("Jour invalide pour le créneau " + (i + 1) + ".", null);
             if (debut.getMinute() % PAS_MINUTES != 0 || debut.getSecond() != 0) {
-                return "L'heure de début doit être à l'heure pile ou à la demi-heure (créneau " + (i + 1) + ").";
+                return new Analyse("L'heure de début doit être à l'heure pile ou à la demi-heure (créneau " + (i + 1) + ").", null);
             }
             LocalTime fin = debut.plusMinutes(duree);
             if (debut.isBefore(PREMIERE_HEURE) || fin.isBefore(debut) || fin.isAfter(DERNIERE_HEURE)) {
-                return "Le créneau " + (i + 1) + " doit commencer après 7h00 et finir avant 22h00.";
+                return new Analyse("Le créneau " + (i + 1) + " doit commencer après 7h00 et finir avant 22h00.", null);
             }
-            if (!dejaVus.add(jour)) return "Choisissez des jours différents : une seule séance par jour.";
-            nouveaux.add(new CreneauEleve(e, jour, debut, duree));
+            if (!dejaVus.add(jour)) return new Analyse("Choisissez des jours différents : une seule séance par jour.", null);
+            plages.add(new Plage(jour, debut, duree));
         }
-        creneaux.deleteByEleveId(eleveId);
+        plages.sort(Comparator.comparingInt(Plage::jour).thenComparing(Plage::debut));
+        return new Analyse(null, plages);
+    }
+
+    /** Créneaux déjà occupés chez ce répétiteur (élèves actifs), sans l'élève exclu. Aucune identité n'est révélée. */
+    @Transactional(readOnly = true)
+    public List<Plage> prisChez(Long repetiteurId, Long exclureEleveId) {
+        List<Plage> l = new ArrayList<>();
+        for (CreneauEleve c : creneaux.findByEleveRepetiteurIdAndEleveActifTrue(repetiteurId)) {
+            if (exclureEleveId != null && c.getEleve().getId().equals(exclureEleveId)) continue;
+            l.add(new Plage(c.getJour(), c.getHeureDebut(), c.getDureeMinutes()));
+        }
+        l.sort(Comparator.comparingInt(Plage::jour).thenComparing(Plage::debut));
+        return l;
+    }
+
+    /** Message si l'un des créneaux chevauche un créneau déjà pris chez ce répétiteur, sinon null. */
+    public String conflit(Long repetiteurId, List<Plage> plages, Long exclureEleveId) {
+        List<Plage> pris = prisChez(repetiteurId, exclureEleveId);
+        for (Plage p : plages) {
+            for (Plage q : pris) {
+                if (p.chevauche(q)) {
+                    return "Ce créneau n'est pas disponible chez ce répétiteur (" + q.resume() + " est déjà pris). Choisissez une autre heure ou un autre jour.";
+                }
+            }
+        }
+        return null;
+    }
+
+    /** Remplace les créneaux d'un élève par ces plages et génère ses séances. */
+    @Transactional
+    public void attribuer(Eleve e, List<Plage> plages) {
+        creneaux.deleteByEleveId(e.getId());
         creneaux.flush();
-        nouveaux.sort(Comparator.comparingInt(CreneauEleve::getJour).thenComparing(CreneauEleve::getHeureDebut));
-        creneaux.saveAll(nouveaux);
+        for (Plage p : plages) creneaux.save(new CreneauEleve(e, p.jour(), p.debut(), p.dureeMinutes()));
         e.setCreneauxMajLe(LocalDateTime.now());
         supprimerSeancesAutoAVenir(e);
         genererPourEleve(e);
+    }
+
+    /**
+     * Enregistre les créneaux choisis par le parent pour un élève suivi. Refuse les créneaux déjà pris chez le répétiteur.
+     * @return un message d'erreur lisible, ou null si tout est enregistré
+     */
+    @Transactional
+    public String enregistrer(Long eleveId, List<String> jours, List<String> heures, String dureeSoumise) {
+        Eleve e = eleves.findById(eleveId).orElseThrow(() -> new RessourceIntrouvableException("Élève introuvable"));
+        Analyse a = analyser(regle(e), jours, heures, dureeSoumise);
+        if (a.erreur() != null) return a.erreur();
+        String conflit = conflit(e.getRepetiteur().getId(), a.plages(), eleveId);
+        if (conflit != null) return conflit;
+        attribuer(e, a.plages());
         return null;
     }
 

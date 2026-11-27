@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Demandes')}"></head>
+<body>
+  <header th:replace="~{fragments :: barre}"></header>
+  <main class="contenu" id="contenu">
+    <h1>Demandes des parents</h1>
+    <div th:replace="~{fragments :: messages}"></div>
+    <p class="petit">Un parent vous a choisi pour son enfant et propose ses horaires. Acceptez si vous êtes disponible :
+      l'élève est alors ajouté à votre liste avec ses créneaux.</p>
+
+    <section class="carte" th:if="${attente.isEmpty()}">
+      <p class="vide">Aucune demande en attente. Complétez votre ville et vos matières dans <a th:href="@{/parametres}">les paramètres</a> pour que les parents vous trouvent plus facilement.</p>
+    </section>
+
+    <section class="carte demande" th:each="d : ${attente}">
+      <div class="carte-titre">
+        <h2 th:text="${d.enfant.nom}">Awa</h2>
+        <span class="badge attente">En attente</span>
+      </div>
+      <p class="petit" th:text="${d.enfant.classe + ' · parent : ' + d.enfant.parent.nomComplet}">3ème · parent</p>
+      <p><span class="montant" th:text="${@fmt.fcfa(tarifs[d.id])}">25 000 FCFA</span> par mois · <span th:text="${regles[d.id].texte()}">2 séances de 2 h</span></p>
+      <ul class="liste"><li th:each="c : ${creneaux[d.id]}"><div class="infos"><strong th:text="${c.resume}">Mardi · 17h00 – 19h00</strong></div></li></ul>
+      <div class="alerte erreur" th:each="w : ${avertissements[d.id]}" th:text="${w}">Chevauchement</div>
+      <p class="petit" th:text="${'Reçue le ' + #temporals.format(d.dateCreation, 'dd/MM/yyyy à HH''h''mm')}">Reçue le …</p>
+      <p><a class="lien-discret" th:href="${liens[d.id]}" target="_blank" rel="noopener">Contacter le parent sur WhatsApp</a></p>
+      <div class="actions-demande">
+        <form th:action="@{/demandes/{id}/accepter(id=${d.id})}" method="post"><button type="submit" class="btn bloc">Accepter</button></form>
+        <form th:action="@{/demandes/{id}/refuser(id=${d.id})}" method="post">
+          <label th:for="'motif' + ${d.id}" class="petit">Motif du refus (facultatif)</label>
+          <input th:id="'motif' + ${d.id}" name="motif" maxlength="255" placeholder="Ex. Je ne suis pas disponible à ces heures">
+          <button type="submit" class="btn bloc secondaire">Refuser</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="carte" th:unless="${historique.isEmpty()}">
+      <h2>Réponses récentes</h2>
+      <ul class="liste">
+        <li th:each="d : ${historique}">
+          <div class="infos"><strong th:text="${d.enfant.nom + ' · ' + d.enfant.classe}">Awa · 3ème</strong>
+            <p class="petit" th:text="${d.enfant.parent.nomComplet}">Parent</p></div>
+          <span class="badge" th:classappend="${d.statut.classeBadge}" th:text="${d.statut.libelle}">Acceptée</span>
+        </li>
+      </ul>
+    </section>
+  </main>
+  <nav th:replace="~{fragments :: navBas('demandes')}"></nav>
+</body>
+</html>

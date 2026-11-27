@@ -20,6 +20,12 @@
     </div>
     <div th:replace="~{fragments :: messages}"></div>
 
+    <div th:if="${nbDemandes > 0}" class="alerte demande-alerte">
+      <strong th:text="${nbDemandes + (nbDemandes > 1 ? ' demandes de parents' : ' demande de parent')}">1 demande de parent</strong>
+      <span th:text="${nbDemandes > 1 ? 'attendent votre réponse : acceptez-les si vous êtes disponible.' : 'attend votre réponse : acceptez-la si vous êtes disponible.'}">attend votre réponse.</span>
+      <a th:href="@{/demandes}" class="btn petit-btn">Voir les demandes</a>
+    </div>
+
     <div th:if="${!sansCreneaux.isEmpty()}" class="alerte info">
       <strong th:text="${sansCreneaux.size() + (sansCreneaux.size() > 1 ? ' élèves' : ' élève')}">2 élèves</strong>
       n'ont pas encore leurs créneaux : c'est le parent qui les choisit depuis son compte.

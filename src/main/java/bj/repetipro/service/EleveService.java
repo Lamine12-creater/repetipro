@@ -50,6 +50,20 @@ public class EleveService {
         return r.isSoloActif() || repo.countByRepetiteurIdAndActifTrue(repetiteurId) < LIMITE_GRATUITE;
     }
 
+    /** Crée l'élève quand un répétiteur accepte la demande d'un parent (tarif de la grille, limite gratuite respectée). */
+    @Transactional
+    public Eleve creerPourParent(Long repetiteurId, String nom, String classe, String nomParent, String telephoneParent) {
+        if (!peutAjouter(repetiteurId)) throw new LimiteGratuiteException(LIMITE_GRATUITE);
+        Eleve e = new Eleve();
+        e.setRepetiteur(repetiteurs.trouver(repetiteurId));
+        e.setNom(nom);
+        e.setClasse(classe);
+        e.setNomParent(nomParent);
+        e.setWhatsappParent(telephoneParent);
+        e.setTarifMensuel(tarifs.montant(classe));
+        return repo.save(e);
+    }
+
     @Transactional
     public Eleve creer(Long repetiteurId, EleveForm f) {
         if (!peutAjouter(repetiteurId)) throw new LimiteGratuiteException(LIMITE_GRATUITE);

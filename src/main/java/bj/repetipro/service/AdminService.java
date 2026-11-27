@@ -32,9 +32,12 @@ public class AdminService {
     private final FactureRepository factures;
     private final PaiementRepository paiements;
     private final ParentRepository parents;
+    private final DemandeRepository demandes;
 
     public AdminService(RepetiteurRepository repetiteurs, EleveRepository eleves, SeanceRepository seances,
-                        FactureRepository factures, PaiementRepository paiements, ParentRepository parents) {
+                        FactureRepository factures, PaiementRepository paiements, ParentRepository parents,
+                        DemandeRepository demandes) {
+        this.demandes = demandes;
         this.parents = parents;
         this.repetiteurs = repetiteurs;
         this.eleves = eleves;
@@ -94,6 +97,15 @@ public class AdminService {
                     s.getEleve().getNom() + " · " + s.getPresence().getLibelle() + " · "
                             + s.getDebut().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM HH:mm"))
                             + " · " + s.getRepetiteur().getNomComplet()));
+        }
+        for (DemandeRepetiteur d : demandes.findTop8ByOrderByDateCreationDesc()) {
+            l.add(new Activite(d.getDateCreation(), "demande", "Demande",
+                    d.getEnfant().getParent().getNomComplet() + " → " + d.getRepetiteur().getNomComplet()
+                            + " pour " + d.getEnfant().getNom() + " (" + d.getEnfant().getClasse() + ")"));
+        }
+        for (DemandeRepetiteur d : demandes.findTop8ByDateDecisionNotNullOrderByDateDecisionDesc()) {
+            l.add(new Activite(d.getDateDecision(), "demande", "Demande " + d.getStatut().getLibelle().toLowerCase(),
+                    d.getRepetiteur().getNomComplet() + " · " + d.getEnfant().getNom() + " (" + d.getEnfant().getClasse() + ")"));
         }
         l.sort(Comparator.comparing(Activite::date, Comparator.nullsLast(Comparator.reverseOrder())));
         return l.size() > max ? l.subList(0, max) : l;

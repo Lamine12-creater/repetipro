@@ -12,6 +12,12 @@
       <label for="nom">Nom affiché aux parents</label>
       <input id="nom" name="nomComplet" th:value="${param.nomComplet != null ? param.nomComplet[0] : moi.nomComplet}" maxlength="100" required>
 
+      <label for="quartier">Ville ou quartier</label>
+      <input id="quartier" name="quartier" th:value="${param.quartier != null ? param.quartier[0] : moi.quartier}" maxlength="100" placeholder="Ex. Cotonou, Akpakpa">
+      <label for="matieres">Matières que vous enseignez</label>
+      <input id="matieres" name="matieres" th:value="${param.matieres != null ? param.matieres[0] : moi.matieres}" maxlength="150" placeholder="Ex. Maths, PCT, Anglais">
+      <p class="petit">Les parents voient ces informations quand ils choisissent un répétiteur.</p>
+
       <h2 style="margin-top:1.2rem">Mobile Money (sur les factures)</h2>
       <label for="momo">Numéro Mobile Money</label>
       <input id="momo" name="numeroMomo" type="tel" inputmode="tel" th:value="${numeroMomo}" placeholder="01 97 00 00 00">

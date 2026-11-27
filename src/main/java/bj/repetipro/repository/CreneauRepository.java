@@ -10,4 +10,5 @@ public interface CreneauRepository extends JpaRepository<CreneauEleve, Long> {
     List<CreneauEleve> findByEleveActifTrue();
     void deleteByEleveId(Long eleveId);
     long countByEleveId(Long eleveId);
+    List<CreneauEleve> findByEleveRepetiteurIdAndEleveActifTrue(Long repetiteurId);
 }

@@ -156,7 +156,7 @@ class ParentIntegrationTest {
 
         // Un parent dont le numéro n'est lié à aucun élève ne voit rien
         UtilisateurConnecte inconnu = principal(parents.inscrire("Parent C", telAleatoire(), "secret123").getTelephone());
-        mvc.perform(get("/parent").with(user(inconnu))).andExpect(content().string(containsString("Aucun élève")));
+        mvc.perform(get("/parent").with(user(inconnu))).andExpect(content().string(containsString("pas encore ajouté d'enfant")));
         // Le parent B (3 h) voit sa propre règle
         mvc.perform(get("/parent/eleves/{id}", enfantB.getId()).with(user(parentB))).andExpect(status().isOk())
                 .andExpect(content().string(containsString("2 séances de 3 h par semaine")))

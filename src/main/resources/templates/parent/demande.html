@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Choisir les horaires')}"></head>
+<body>
+  <header th:replace="~{fragments :: barreParent}"></header>
+  <main class="contenu" id="contenu">
+    <p class="surtitre"><a th:href="@{/parent/enfants/{id}/repetiteurs(id=${enfant.id})}">← Autre répétiteur</a></p>
+    <h1>Choisir les horaires</h1>
+    <div class="etapes" aria-label="Étapes"><span>1. Mon enfant</span><span>2. Répétiteur</span><span class="actif">3. Horaires</span></div>
+
+    <section class="carte">
+      <p><strong th:text="${enfant.nom}">Awa</strong> · <span th:text="${enfant.classe}">3ème</span> chez
+        <strong th:text="${repetiteur.nomComplet}">Répétiteur</strong></p>
+      <p class="petit" th:if="${repetiteur.quartier != null or repetiteur.matieres != null}"
+         th:text="${(repetiteur.quartier ?: '') + (repetiteur.quartier != null and repetiteur.matieres != null ? ' · ' : '') + (repetiteur.matieres ?: '')}">Cotonou · Maths</p>
+      <div class="grille-2 infos-fixes">
+        <div><span class="petit">Tarif mensuel</span><p class="montant-fixe" th:text="${@fmt.fcfa(tarif)}">25 000 FCFA</p></div>
+        <div><span class="petit">Règle de la classe</span><p class="montant-fixe regle" th:text="${regle.texte()}">2 séances de 2 h par semaine</p></div>
+      </div>
+    </section>
+
+    <div class="alerte info" th:unless="${pris.isEmpty()}">
+      <strong>Créneaux déjà pris chez ce répétiteur</strong> (indisponibles) :
+      <ul class="pris"><li th:each="p : ${pris}" th:text="${p.resume()}">Lundi · 17h00 – 19h00</li></ul>
+    </div>
+
+    <form class="carte" th:action="@{/parent/enfants/{id}/demande(id=${enfant.id})}" method="post" id="form-creneaux">
+      <input type="hidden" name="repetiteur" th:value="${repetiteur.id}">
+      <div class="alerte erreur" th:if="${erreur}" th:text="${erreur}">Erreur</div>
+      <h2>Vos horaires de travail</h2>
+      <div class="alerte info">Choisissez
+        <strong th:text="${regle.seances() + (regle.seances() > 1 ? ' jours différents' : ' jour')}">2 jours différents</strong>
+        et l'heure de début. Chaque séance dure <strong th:text="${regle.heures() + ' h'}">2 h</strong> : l'heure de fin s'affiche toute seule.
+        Le répétiteur pourra accepter ou refuser selon sa disponibilité.</div>
+      <div class="creneau-ligne" th:each="i : ${lignes}"
+           th:with="selJ=${saisieJours != null and i < saisieJours.size() ? saisieJours[i] : ''},
+                    selH=${saisieHeures != null and i < saisieHeures.size() ? saisieHeures[i] : ''}">
+        <strong th:text="'Séance ' + ${i + 1}">Séance 1</strong>
+        <div class="grille-2">
+          <div>
+            <label th:for="'jour' + ${i}">Jour</label>
+            <select th:id="'jour' + ${i}" name="jour" required>
+              <option value="">Choisir…</option>
+              <option th:each="j, it : ${jours}" th:value="${it.count}" th:text="${j}" th:selected="${selJ == (it.count + '')}">Lundi</option>
+            </select>
+          </div>
+          <div>
+            <label th:for="'heure' + ${i}">Début</label>
+            <select th:id="'heure' + ${i}" name="heure" class="heure-debut" th:attr="data-duree=${regle.dureeMinutes()}" required>
+              <option value="">Choisir…</option>
+              <option th:each="h : ${heures}" th:value="${h}" th:text="${#strings.replace(h, ':', 'h')}" th:selected="${selH == h}">17h00</option>
+            </select>
+          </div>
+        </div>
+        <p class="petit fin-seance">Fin : —</p>
+      </div>
+      <p class="petit">Séances possibles entre 7h00 et 22h00, une seule par jour.</p>
+      <p style="margin-top:1rem"><button type="submit" class="btn bloc" th:disabled="${active}">Envoyer ma demande</button></p>
+    </form>
+  </main>
+  <script th:src="@{/js/creneaux.js}"></script>
+</body>
+</html>

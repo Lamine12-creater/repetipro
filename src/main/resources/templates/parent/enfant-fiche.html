@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Mon enfant')}"></head>
+<body>
+  <header th:replace="~{fragments :: barreParent}"></header>
+  <main class="contenu" id="contenu">
+    <p class="surtitre"><a th:href="@{/parent}">← Mes enfants</a></p>
+    <h1 th:text="${enfant.nom}">Nom de l'enfant</h1>
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <section class="carte">
+      <p class="petit" th:text="${enfant.classe}">3ème</p>
+      <div class="grille-2 infos-fixes">
+        <div><span class="petit">Tarif mensuel</span><p class="montant-fixe" th:text="${@fmt.fcfa(vue.tarif)}">25 000 FCFA</p></div>
+        <div><span class="petit">Règle de la classe</span><p class="montant-fixe regle" th:text="${vue.regle.texte()}">2 séances de 2 h par semaine</p></div>
+      </div>
+      <p class="petit">Le tarif et la durée des séances sont fixés par RépétiPro pour chaque classe.</p>
+      <p th:if="${vue.eleve != null}" style="margin-top:.8rem"><a th:href="@{/parent/eleves/{id}(id=${vue.eleve.id})}" class="btn bloc">Voir le suivi : séances, présences, factures</a></p>
+      <p th:if="${!vue.active}" style="margin-top:.8rem"><a th:href="@{/parent/enfants/{id}/repetiteurs(id=${enfant.id})}" class="btn bloc">Choisir un répétiteur</a></p>
+    </section>
+
+    <section class="carte">
+      <h2>Mes demandes</h2>
+      <p class="vide" th:if="${demandes.isEmpty()}">Aucune demande pour l'instant.</p>
+      <div class="demande" th:each="d : ${demandes}">
+        <div class="carte-titre">
+          <strong th:text="${d.repetiteur.nomComplet}">Répétiteur</strong>
+          <span class="badge" th:classappend="${d.statut.classeBadge}" th:text="${d.statut.libelle}">En attente</span>
+        </div>
+        <ul class="liste"><li th:each="c : ${creneauxDemande[d.id]}"><div class="infos"><strong th:text="${c.resume}">Mardi · 17h00 – 19h00</strong></div></li></ul>
+        <p class="petit" th:text="${'Envoyée le ' + #temporals.format(d.dateCreation, 'dd/MM/yyyy à HH''h''mm')}">Envoyée le …</p>
+        <p class="motif" th:if="${d.statut.name() == 'REFUSEE'}">
+          <strong>Refusée</strong><span th:if="${d.motif != null}"> : « <span th:text="${d.motif}">motif</span> »</span>
+          <br><a th:href="@{/parent/enfants/{id}/repetiteurs(id=${enfant.id})}" th:if="${!vue.active}">Choisir un autre répétiteur</a>
+        </p>
+        <p class="petit" th:if="${d.statut.name() == 'ACCEPTEE'}">Acceptée : votre enfant est suivi par ce répétiteur sur ces créneaux.</p>
+        <form th:if="${d.statut.name() == 'EN_ATTENTE'}" th:action="@{/parent/demandes/{id}/annuler(id=${d.id})}" method="post">
+          <button type="submit" class="btn petit-btn secondaire">Annuler cette demande</button>
+        </form>
+      </div>
+    </section>
+
+    <form class="carte" th:action="@{/parent/enfants/{id}/infos(id=${enfant.id})}" method="post" th:unless="${vue.active}">
+      <h2>Informations de l'enfant</h2>
+      <div class="alerte erreur" th:if="${erreur}" th:text="${erreur}">Erreur</div>
+      <label for="nom">Nom de l'enfant</label>
+      <input id="nom" name="nom" th:value="${enfant.nom}" maxlength="100" required>
+      <label for="classe">Classe</label>
+      <select id="classe" name="classe" required>
+        <option th:each="c : ${classes}" th:value="${c.libelle}" th:text="${c.libelle}" th:selected="${c.libelle == enfant.classe}">3ème</option>
+      </select>
+      <p style="margin-top:1rem"><button type="submit" class="btn bloc secondaire">Enregistrer</button></p>
+    </form>
+  </main>
+</body>
+</html>

@@ -587,3 +587,22 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--i
 .deux-espaces .espace p { margin: .5rem 0 .7rem; font-size: .95rem; }
 .deja-inscrit { font-size: .9rem; color: var(--muet); }
 @media (min-width: 700px) { .deux-espaces { grid-template-columns: 1fr 1fr; } }
+
+/* ===== 23. Demandes parent → répétiteur ===== */
+.pastille-nb { display: inline-block; min-width: 1.25rem; padding: 0 .35rem; margin-left: .3rem; border-radius: 999px;
+  background: var(--rouge); color: #fff; font-size: .72rem; line-height: 1.25rem; text-align: center; font-weight: 700; }
+.nav-bas a .ico { position: relative; display: inline-block; }
+.nav-bas a .ico .pastille-nb { position: absolute; top: -6px; right: -12px; margin: 0; }
+.demande-alerte { background: var(--orange-clair); border: 1px solid #e9c46a; color: #6b4600; display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.etapes { display: flex; gap: .4rem; margin: .4rem 0 1rem; font-size: .8rem; }
+.etapes span { flex: 1; text-align: center; padding: .4rem .2rem; border-radius: 999px; background: #ece7da; color: #6b665a; }
+.etapes span.actif { background: var(--vert); color: #fff; font-weight: 700; }
+.repetiteur .avatar-petit { width: 2.2rem; height: 2.2rem; border-radius: 50%; background: var(--vert-clair); color: var(--vert);
+  display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: .85rem; }
+.pris { margin: .4rem 0 0; padding-left: 1.1rem; }
+.demande + .demande { border-top: 1px dashed #d9d3c3; margin-top: .8rem; padding-top: .8rem; }
+.motif { background: var(--rouge-clair); color: var(--rouge); padding: .5rem .7rem; border-radius: 8px; }
+.actions-demande { display: grid; gap: .8rem; margin-top: .8rem; }
+.actions-demande form { display: grid; gap: .4rem; }
+.sous-titre { margin-top: 1.4rem; font-size: 1rem; }
+.demande-alerte .btn { color: #fff; }

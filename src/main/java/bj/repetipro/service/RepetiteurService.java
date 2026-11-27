@@ -86,6 +86,20 @@ public class RepetiteurService implements UserDetailsService {
         r.setNomMomo(nomMomo == null ? null : nomMomo.trim());
     }
 
+    /** Profil public montré aux parents : ville/quartier et matières (facultatifs). */
+    @Transactional
+    public void majProfil(Long id, String quartier, String matieres) {
+        Repetiteur r = trouver(id);
+        r.setQuartier(nettoyer(quartier, 100));
+        r.setMatieres(nettoyer(matieres, 150));
+    }
+
+    private static String nettoyer(String s, int max) {
+        if (s == null || s.isBlank()) return null;
+        String t = s.trim();
+        return t.length() > max ? t.substring(0, max) : t;
+    }
+
     // --- Administration (activation manuelle de la formule Solo) ---
 
     public List<Repetiteur> tous() {

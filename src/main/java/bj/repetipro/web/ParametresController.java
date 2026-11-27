@@ -32,6 +32,8 @@ public class ParametresController {
                               @RequestParam String nomComplet,
                               @RequestParam(required = false) String numeroMomo,
                               @RequestParam(required = false) String nomMomo,
+                              @RequestParam(required = false) String quartier,
+                              @RequestParam(required = false) String matieres,
                               Model model, RedirectAttributes flash) {
         boolean momoInvalide = numeroMomo != null && !numeroMomo.isBlank() && !Telephones.estValide(numeroMomo);
         if (nomComplet == null || nomComplet.isBlank() || nomComplet.length() > 100 || momoInvalide) {
@@ -41,6 +43,7 @@ public class ParametresController {
         }
         repetiteurs.majParametres(moi.getId(), nomComplet, numeroMomo,
                 nomMomo == null ? null : nomMomo.substring(0, Math.min(100, nomMomo.length())));
+        repetiteurs.majProfil(moi.getId(), quartier, matieres);
         flash.addFlashAttribute("message", "Paramètres enregistrés.");
         return "redirect:/parametres";
     }

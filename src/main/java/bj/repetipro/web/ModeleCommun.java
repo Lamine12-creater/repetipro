@@ -19,9 +19,11 @@ public class ModeleCommun {
     private final bj.repetipro.service.ParametreService parametres;
 
     private final bj.repetipro.service.ParentService parents;
+    private final bj.repetipro.service.DemandeService demandes;
 
     public ModeleCommun(RepetiteurService repetiteurs, bj.repetipro.service.ParametreService parametres,
-                        bj.repetipro.service.ParentService parents) {
+                        bj.repetipro.service.ParentService parents, bj.repetipro.service.DemandeService demandes) {
+        this.demandes = demandes;
         this.parents = parents;
         this.repetiteurs = repetiteurs;
         this.parametres = parametres;
@@ -36,6 +38,12 @@ public class ModeleCommun {
         return u == null || u.isParent() ? null : repetiteurs.trouver(u.getId());
     }
 
+    /** Nombre de demandes de parents en attente (badge du menu répétiteur). */
+    @ModelAttribute("nbDemandes")
+    public long nbDemandes(@AuthenticationPrincipal UtilisateurConnecte u) {
+        return u == null || u.isParent() ? 0 : demandes.enAttente(u.getId());
+    }
+
     /** Le parent connecté (pages /parent), sinon null. */
     @ModelAttribute("moiParent")
     public bj.repetipro.model.CompteParent moiParent(@AuthenticationPrincipal UtilisateurConnecte u) {
@@ -48,6 +56,7 @@ public class ModeleCommun {
         String uri = requete.getRequestURI();
         if (uri.startsWith("/eleves")) return "eleves";
         if (uri.startsWith("/seances")) return "seances";
+        if (uri.startsWith("/demandes")) return "demandes";
         if (uri.startsWith("/factures")) return "factures";
         if (uri.startsWith("/tableau-de-bord")) return "accueil";
         if (uri.startsWith("/admin")) return "admin";

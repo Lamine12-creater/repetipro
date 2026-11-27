@@ -36,6 +36,7 @@
       <li><a th:href="@{/tableau-de-bord}" th:classappend="${rubrique == 'accueil'} ? 'actif'">Accueil</a></li>
       <li><a th:href="@{/eleves}" th:classappend="${rubrique == 'eleves'} ? 'actif'">Élèves</a></li>
       <li><a th:href="@{/seances}" th:classappend="${rubrique == 'seances'} ? 'actif'">Séances</a></li>
+      <li><a th:href="@{/demandes}" th:classappend="${rubrique == 'demandes'} ? 'actif'">Demandes<span class="pastille-nb" th:if="${nbDemandes > 0}" th:text="${nbDemandes}">2</span></a></li>
       <li><a th:href="@{/factures}" th:classappend="${rubrique == 'factures'} ? 'actif'">Factures</a></li>
       <li th:if="${estAdmin}"><a th:href="@{/admin}" th:classappend="${rubrique == 'admin'} ? 'actif'">Admin</a></li>
     </ul>
@@ -80,6 +81,8 @@
     <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .7 3.2 2.4 3.5 5.2"/></svg></span>Élèves</a>
   <a th:href="@{/seances}" th:classappend="${actif == 'seances'} ? 'actif'">
     <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M8.5 15l2.5 2.5 4.5-4.5"/></svg></span>Séances</a>
+  <a th:href="@{/demandes}" th:classappend="${actif == 'demandes'} ? 'actif'">
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10h7"/></svg><span class="pastille-nb" th:if="${nbDemandes > 0}" th:text="${nbDemandes}">2</span></span>Demandes</a>
   <a th:href="@{/factures}" th:classappend="${actif == 'factures'} ? 'actif'">
     <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></span>Factures</a>
   <a th:if="${estAdmin}" th:href="@{/admin}" th:classappend="${actif == 'admin' or rubrique == 'admin'} ? 'actif'">

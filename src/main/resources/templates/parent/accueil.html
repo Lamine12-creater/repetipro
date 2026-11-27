@@ -8,10 +8,34 @@
     <div th:if="${param.bienvenue}" class="alerte succes">Bienvenue ! Voici les élèves liés à votre numéro.</div>
     <div th:replace="~{fragments :: messages}"></div>
 
-    <section class="carte" th:if="${enfants.isEmpty()}">
-      <p class="vide">Aucun élève n'est encore lié à votre numéro (<strong th:text="${@fmt.tel(moiParent.telephone)}">01 …</strong>).<br>
-        Demandez au répétiteur d'ajouter ce numéro dans la fiche de votre enfant : il apparaîtra ici tout seul.</p>
+    <p><a th:href="@{/parent/enfants/nouveau}" class="btn bloc">+ Ajouter mon enfant</a></p>
+
+    <section class="carte" th:if="${enfants.isEmpty() and mesEnfants.isEmpty()}">
+      <p class="vide">Vous n'avez pas encore ajouté d'enfant.<br>
+        Ajoutez-le, choisissez un répétiteur disponible puis vos horaires : le répétiteur valide votre demande.</p>
     </section>
+
+    <!-- Enfants créés par le parent : état de la demande -->
+    <section class="carte enfant" th:each="v : ${mesEnfants}">
+      <div class="carte-titre">
+        <h2 th:text="${v.enfant.nom}">Nom</h2>
+        <span class="badge" th:if="${v.eleve != null}" th:classappend="'paye'">Suivi</span>
+        <span class="badge" th:if="${v.eleve == null and v.derniere != null}" th:classappend="${v.derniere.statut.classeBadge}" th:text="${v.derniere.statut.libelle}">En attente</span>
+        <span class="badge attente" th:if="${v.eleve == null and v.derniere == null}">Sans répétiteur</span>
+      </div>
+      <p class="petit" th:text="${v.enfant.classe}">3ème</p>
+      <p><span class="montant" th:text="${@fmt.fcfa(v.tarif)}">25 000 FCFA</span> par mois · <span th:text="${v.regle.texte()}">2 séances de 2 h par semaine</span></p>
+      <p th:if="${v.derniere != null}" class="petit"
+         th:text="${v.derniere.statut.name() == 'EN_ATTENTE' ? 'Demande envoyée à ' + v.derniere.repetiteur.nomComplet + ' : en attente de sa réponse.'
+                   : (v.derniere.statut.name() == 'ACCEPTEE' ? 'Accepté par ' + v.derniere.repetiteur.nomComplet + '.'
+                   : (v.derniere.statut.name() == 'REFUSEE' ? 'Refusée par ' + v.derniere.repetiteur.nomComplet + (v.derniere.motif != null ? ' : « ' + v.derniere.motif + ' »' : '.')
+                   : 'Demande annulée.'))}">Demande envoyée</p>
+      <p style="margin-top:.8rem" th:if="${v.eleve != null}"><a th:href="@{/parent/eleves/{id}(id=${v.eleve.id})}" class="btn bloc">Voir le suivi</a></p>
+      <p style="margin-top:.8rem" th:if="${v.eleve == null}"><a th:href="@{/parent/enfants/{id}(id=${v.enfant.id})}" class="btn bloc secondaire">Voir la demande</a></p>
+      <p th:if="${v.eleve == null and !v.active}"><a th:href="@{/parent/enfants/{id}/repetiteurs(id=${v.enfant.id})}">Choisir un répétiteur</a></p>
+    </section>
+
+    <h2 th:unless="${enfants.isEmpty()}" class="sous-titre">Élèves suivis ajoutés par un répétiteur</h2>
 
     <section class="carte enfant" th:each="e : ${enfants}">
       <div class="carte-titre">

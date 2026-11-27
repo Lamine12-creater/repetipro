@@ -22,7 +22,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(regles -> regles
                 // Pages accessibles sans compte
                 .requestMatchers("/", "/connexion", "/inscription", "/inscription/**", "/formule",
-                                 "/css/**", "/favicon.svg", "/favicon.ico", "/error").permitAll()
+                                 "/css/**", "/js/**", "/favicon.svg", "/favicon.ico", "/error").permitAll()
                 // Webhook FedaPay : appelé par les serveurs FedaPay (sans session) ; protégé par
                 // la signature X-FEDAPAY-SIGNATURE vérifiée dans PaiementService.
                 .requestMatchers("/paiement/webhook/**").permitAll()

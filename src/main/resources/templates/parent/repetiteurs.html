@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Choisir un répétiteur')}"></head>
+<body>
+  <header th:replace="~{fragments :: barreParent}"></header>
+  <main class="contenu" id="contenu">
+    <p class="surtitre"><a th:href="@{/parent/enfants/{id}(id=${enfant.id})}">← Fiche de l'enfant</a></p>
+    <h1>Choisir un répétiteur</h1>
+    <div th:replace="~{fragments :: messages}"></div>
+    <div class="etapes" aria-label="Étapes"><span>1. Mon enfant</span><span class="actif">2. Répétiteur</span><span>3. Horaires</span></div>
+
+    <section class="carte">
+      <p><strong th:text="${enfant.nom}">Awa</strong> · <span th:text="${enfant.classe}">3ème</span></p>
+      <p><span class="montant" th:text="${@fmt.fcfa(tarif)}">25 000 FCFA</span> par mois · <span th:text="${regle.texte()}">2 séances de 2 h par semaine</span></p>
+    </section>
+
+    <div class="alerte info" th:if="${active}">Une demande est déjà en cours ou acceptée pour cet enfant. <a th:href="@{/parent/enfants/{id}(id=${enfant.id})}">Voir son état</a></div>
+
+    <section class="carte" th:if="${repetiteurs.isEmpty()}">
+      <p class="vide">Aucun répétiteur n'est disponible pour le moment. Revenez plus tard.</p>
+    </section>
+
+    <section class="carte repetiteur" th:each="r : ${repetiteurs}">
+      <div class="carte-titre">
+        <h2 th:text="${r.nomComplet}">Nom du répétiteur</h2>
+        <span class="avatar-petit" th:text="${r.initiales}">RD</span>
+      </div>
+      <p class="petit" th:if="${r.quartier != null}">📍 <span th:text="${r.quartier}">Cotonou</span></p>
+      <p class="petit" th:if="${r.matieres != null}">Matières : <span th:text="${r.matieres}">Maths</span></p>
+      <p class="petit" th:if="${r.quartier == null and r.matieres == null}">Profil non renseigné.</p>
+      <p th:unless="${active}" style="margin-top:.8rem"><a th:href="@{/parent/enfants/{id}/demande(id=${enfant.id},repetiteur=${r.id})}" class="btn bloc">Choisir ce répétiteur</a></p>
+    </section>
+  </main>
+</body>
+</html>

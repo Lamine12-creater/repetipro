@@ -53,6 +53,14 @@ public class Repetiteur {
      */
     private Boolean compteActif;
 
+    /** Ville ou quartier, montré aux parents qui cherchent un répétiteur (facultatif). */
+    @Column(length = 100)
+    private String quartier;
+
+    /** Matières enseignées, montrées aux parents (facultatif). */
+    @Column(length = 150)
+    private String matieres;
+
     // --- Getters / setters (générés classiquement) ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -72,6 +80,10 @@ public class Repetiteur {
     public void setDateInscription(LocalDateTime dateInscription) { this.dateInscription = dateInscription; }
     public LocalDate getSoloJusquAu() { return soloJusquAu; }
     public void setSoloJusquAu(LocalDate soloJusquAu) { this.soloJusquAu = soloJusquAu; }
+    public String getQuartier() { return quartier; }
+    public void setQuartier(String quartier) { this.quartier = quartier; }
+    public String getMatieres() { return matieres; }
+    public void setMatieres(String matieres) { this.matieres = matieres; }
     public boolean isCompteActif() { return compteActif == null || compteActif; }
     public void setCompteActif(boolean actif) { this.compteActif = actif; }
 
